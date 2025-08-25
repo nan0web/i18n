@@ -2,9 +2,9 @@
 	"name": "@nan0web/i18n",
 	"version": "1.0.0",
 	"description": "A tiny, zero‑dependency i18n helper for Java•Script projects.",
-	"main": "./src/18n.js",
+	"main": "./src/i18n.js",
 	"type": "module",
-	"types": "./types/18n.d.ts",
+	"types": "./types/i18n.d.ts",
 	"scripts": {
 		"build": "tsc",
 		"test": "node --test",
