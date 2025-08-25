@@ -1,0 +1,34 @@
+{
+	"name": "@nan0web/i18n",
+	"version": "1.0.0",
+	"description": "A tiny, zero‑dependency i18n helper for Java•Script projects.",
+	"main": "./src/18n.js",
+	"type": "module",
+	"types": "./types/18n.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"test": "node --test",
+		"test:coverage": "node --test --experimental-test-coverage --test-coverage-include=src/**/*.js",
+		"precommit": "npm test",
+		"prepush": "npm test",
+		"prepare": "husky"
+	},
+	"keywords": [
+		"communication",
+		"message",
+		"messaging",
+		"i18n",
+		"localization",
+		"locale",
+		"nan0web"
+	],
+	"author": "ЯRаСлав YaRaSLove <support@yaro.page>",
+	"license": "ISC",
+	"packageManager": "pnpm@10.11.0",
+	"devDependencies": {
+		"@nan0web/db-fs": "workspace:*",
+		"@nan0web/log": "workspace:*",
+		"@nan0web/test": "workspace:*",
+		"husky": "^9.1.7"
+	}
+}
