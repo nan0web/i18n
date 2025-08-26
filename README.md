@@ -9,26 +9,44 @@ generate translation functions for any language.
 npm install @nan0web/i18n
 ```
 
-## Usage
+## Usage with Locale Detection
 
-tDefault is just for example, usually there is no need to use it
+For handling multiple dictionaries, you can create a vocab loader using the `i18n` utility:
 ```js
-import tDefault, { createT } from '@nan0web/i18n'
-import uk from './src/uk.js'   // Ukrainian dictionary
+import { i18n, createT } from "@nan0web/i18n"
 
-// ✅ Default (English) translation function
-console.info(tDefault('Welcome!', { name: 'Anna' }))
-// → "Welcome, Anna!"
+const en = { "Welcome!": "Welcome, {name}!" }
+const uk = { "Welcome!": "Вітаю, {name}!" }
+const ukRU = { "Welcome!": "Привіт, {name}!" }
+const ukCA = { "Welcome!": "Вітаємо, {name}!" }
 
-// ✅ Create a Ukrainian translation function
-const t = createT(uk)
+const getVocab = i18n({ en, uk, 'uk-RU': ukRU, 'uk-CA': ukCA })
 
-console.info(t('Welcome!', { name: 'Іван' }))
-// → "Вітаємо у пісочниці, Іван!"
+let t = createT(getVocab('en', en))
+console.info(t('Welcome!', { name: 'Alice' })) // ← "Welcome, Alice!"
 
-// ✅ Missing key falls back to the original key
-console.info(t('NonExistingKey'))
-// → "NonExistingKey"
+t = createT(getVocab('uk', en))
+console.info(t('Welcome!', { name: 'Богдан' })) // ← "Вітаю, Богдан!"
+
+t = createT(getVocab('uk-RU', en))
+console.info(t('Welcome!', { name: 'Саша' })) // ← "Привіт, Саша!"
+
+t = createT(getVocab('uk-CA', en))
+console.info(t('Welcome!', { name: 'Марія' })) // ← "Вітаємо, Марія!"
+
+t = createT(getVocab('unknown', en))
+console.info(t('Welcome!', { name: 'Fallback' })) // ← "Welcome, Fallback!"
+```
+## Keywords extractions
+
+You can also extract translation keys directly from your source code:
+```js
+const content = `
+console.log(t("Hello, {name}!"))
+const menu = ["First", "Second"] // t("First"), t("Second")
+`
+const keys = extract(content)
+console.info(keys) // ← ["First", "Hello, {name}!", "Second"]
 ```
 ## API
 
@@ -50,41 +68,34 @@ Creates a translation function bound to the supplied vocabulary.
   * If the key is missing, returns the original `key`.
   * Replaces placeholders of the form `{placeholder}` with values from `vars`.
 
-### Default export
-The default export is a translation function that uses the built‑in English
-dictionary (`defaultVocab`). It is ready to use without any setup.
+### `i18n(mapLike)`
+Utility function to select the appropriate vocabulary dictionary by locale.
 
-## Adding a New Language
-Create a new module (e.g., `src/fr.js`) that exports a dictionary:
+* **Parameters**
+  * `mapLike` – an object containing locale mappings.
 
-```js
-export default {
-  "Welcome!": "Bienvenue, {name}!",
-  "Submit": "Envoyer",
-  // …other keys
-}
-```
-Then generate a translation function:
+* **Returns**
+  * a function that accepts a locale string and optional default dictionary.
 
-```js
-import fr from './src/fr.js'
-const t = createT(fr)
-```
+## CLI Playground
 
-## Testing
-Run the bundled tests with:
-
+There is also a CLI sandbox playground to try the library directly:
 ```bash
-npm test
+# Clone the repository and run the CLI playground
+git clone https://github.com/nan0web/i18n.git
+cd i18n
+npm install
+npm run playground
 ```
-The test suite covers default behaviour, placeholder substitution and fallback
-logic.
+
+## Java•Script
+
+Uses `d.ts` to provide autocomplete hints.
 
 ## Contributing
 
 Ready to contribute [check here](./CONTRIBUTING.md)
 
 ## License
-ISC – see the [LICENSE](./LICENSE) file.
 
-LICENSE file exists
+ISC – see the [LICENSE](./LICENSE) file.

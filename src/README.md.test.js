@@ -3,26 +3,20 @@ import assert from 'node:assert/strict'
 import DB from '@nan0web/db-fs'
 import { NoConsole } from "@nan0web/log"
 import { DocsParser } from "@nan0web/test"
-import tDefault, { createT } from './i18n.js'
-import uk from './uk.js'
+import { createT, extract, i18n } from './index.js'
+import { spawn } from 'node:child_process'
 
 const fs = new DB()
 let pkg
-let originalConsole
 
 // Load package.json once before tests
 before(async () => {
-	originalConsole = console
 	const doc = await fs.loadDocument('package.json', {})
 	pkg = doc || {}
 })
 
 beforeEach(() => {
 	console = new NoConsole()
-})
-
-after(() => {
-	console = originalConsole
 })
 
 /**
@@ -32,7 +26,7 @@ after(() => {
  * the final `README.md`. Keeping the comments here ensures the
  * documentation stays close to the code.
  */
-function testRender () {
+function testRender() {
 	/**
 	 * @docs
 	 * # @nan0web/i18n
@@ -40,34 +34,65 @@ function testRender () {
 	 * A tiny, zero‑dependency i18n helper for Java•Script projects.
 	 * It provides a default English dictionary and a simple `createT` factory to
 	 * generate translation functions for any language.
-	 *
-	 * ## Install
-	 * ```bash
-	 * npm install @nan0web/i18n
-	 * ```
-	 *
-	 * ## Usage
 	 */
-	it("tDefault is just for example, usually there is no need to use it", () => {
-		//import tDefault, { createT } from '@nan0web/i18n'
-		//import uk from './src/uk.js'   // Ukrainian dictionary
+	it("## Install", () => {
+		/**
+		 * ```bash
+		 * npm install @nan0web/i18n
+		 * ```
+		 */
+		assert.equal(pkg.name, "@nan0web/i18n")
+	})
+	/**
+	 * @docs
+	 * ## Usage with Locale Detection
+	 */
+	it('For handling multiple dictionaries, you can create a vocab loader using the `i18n` utility:', () => {
+		//import { i18n, createT } from "@nan0web/i18n"
 
-		// ✅ Default (English) translation function
-		console.info(tDefault('Welcome!', { name: 'Anna' }))
-		// → "Welcome, Anna!"
+		const en = { "Welcome!": "Welcome, {name}!" }
+		const uk = { "Welcome!": "Вітаю, {name}!" }
+		const ukRU = { "Welcome!": "Привіт, {name}!" }
+		const ukCA = { "Welcome!": "Вітаємо, {name}!" }
 
-		// ✅ Create a Ukrainian translation function
-		const t = createT(uk)
+		const getVocab = i18n({ en, uk, 'uk-RU': ukRU, 'uk-CA': ukCA })
 
-		console.info(t('Welcome!', { name: 'Іван' }))
-		// → "Вітаємо у пісочниці, Іван!"
+		let t = createT(getVocab('en', en))
+		console.info(t('Welcome!', { name: 'Alice' })) // ← "Welcome, Alice!"
 
-		// ✅ Missing key falls back to the original key
-		console.info(t('NonExistingKey'))
-		// → "NonExistingKey"
-		assert.deepStrictEqual(console.output(), [
-			"Welcome, Anna!", "Вітаємо у пісочниці, Іван!", "NonExistingKey"
-		].map(el => (["info", el])))
+		t = createT(getVocab('uk', en))
+		console.info(t('Welcome!', { name: 'Богдан' })) // ← "Вітаю, Богдан!"
+
+		t = createT(getVocab('uk-RU', en))
+		console.info(t('Welcome!', { name: 'Саша' })) // ← "Привіт, Саша!"
+
+		t = createT(getVocab('uk-CA', en))
+		console.info(t('Welcome!', { name: 'Марія' })) // ← "Вітаємо, Марія!"
+
+		t = createT(getVocab('unknown', en))
+		console.info(t('Welcome!', { name: 'Fallback' })) // ← "Welcome, Fallback!"
+		assert.deepEqual(console.output(), [
+			["info", "Welcome, Alice!"],
+			["info", "Вітаю, Богдан!"],
+			["info", "Привіт, Саша!"],
+			["info", "Вітаємо, Марія!"],
+			["info", "Welcome, Fallback!"],
+		])
+	})
+	/**
+	 * @docs
+	 * ## Keywords extractions
+	 */
+	it("You can also extract translation keys directly from your source code:", () => {
+		const content = `
+		console.log(t("Hello, {name}!"))
+		const menu = ["First", "Second"] // t("First"), t("Second")
+		`
+		const keys = extract(content)
+		console.info(keys) // ← ["First", "Hello, {name}!", "Second"]
+		assert.deepEqual(console.output(), [
+			["info", ["First", "Hello, {name}!", "Second"]]
+		])
 	})
 	/**
 	 * @docs
@@ -91,40 +116,61 @@ function testRender () {
 	 *   * If the key is missing, returns the original `key`.
 	 *   * Replaces placeholders of the form `{placeholder}` with values from `vars`.
 	 *
-	 * ### Default export
-	 * The default export is a translation function that uses the built‑in English
-	 * dictionary (`defaultVocab`). It is ready to use without any setup.
+	 * ### `i18n(mapLike)`
+	 * Utility function to select the appropriate vocabulary dictionary by locale.
 	 *
-	 * ## Adding a New Language
-	 * Create a new module (e.g., `src/fr.js`) that exports a dictionary:
+	 * * **Parameters**
+	 *   * `mapLike` – an object containing locale mappings.
 	 *
-	 * ```js
-	 * export default {
-	 *   "Welcome!": "Bienvenue, {name}!",
-	 *   "Submit": "Envoyer",
-	 *   // …other keys
-	 * }
-	 * ```
-	 * Then generate a translation function:
+	 * * **Returns**
+	 *   * a function that accepts a locale string and optional default dictionary.
 	 *
-	 * ```js
-	 * import fr from './src/fr.js'
-	 * const t = createT(fr)
-	 * ```
-	 *
-	 * ## Testing
-	 * Run the bundled tests with:
-	 *
-	 * ```bash
-	 * npm test
-	 * ```
-	 * The test suite covers default behaviour, placeholder substitution and fallback
-	 * logic.
-	 *
+	 * ## CLI Playground
+	 */
+	it("There is also a CLI sandbox playground to try the library directly:", () => {
+		/**
+		 * ```bash
+		 * # Clone the repository and run the CLI playground
+		 * git clone https://github.com/nan0web/i18n.git
+		 * cd i18n
+		 * npm install
+		 * npm run playground
+		 * ```
+		 */
+		assert.ok(String(pkg.scripts?.playground).includes("node playground"))
+
+		// Spawn process to check git remote URL
+		const result = spawn('git', ['remote', 'get-url', 'origin'])
+		let output = ''
+
+		result.stdout.on('data', (data) => {
+			output += data.toString()
+		})
+
+		result.on('close', (code) => {
+			if (code === 0) {
+				assert.ok(output.trim().endsWith(':nan0web/i18n.git'))
+			} else {
+				assert.ok(false, "git command fails (e.g., not in a git repo)")
+			}
+		})
+	})
+	/**
+	 * @docs
+	 * ## Java•Script
+	 */
+	it("Uses `d.ts` to provide autocomplete hints.", () => {
+		assert.equal(pkg.types, "./types/index.d.ts")
+		assert.equal(pkg.scripts?.build, "tsc")
+	})
+	/**
+	 * @docs
 	 * ## Contributing
 	 */
 	it("Ready to contribute [check here](./CONTRIBUTING.md)", async () => {
-		/** @docs */
+		assert.equal(pkg.scripts?.precommit, "npm test")
+		assert.equal(pkg.scripts?.prepush, "npm test")
+		assert.equal(pkg.scripts?.prepare, "husky")
 		const text = await fs.loadDocument("CONTRIBUTING.md")
 		const str = String(text)
 		assert.ok(str.includes('# Contributing'))
@@ -132,23 +178,11 @@ function testRender () {
 	/**
 	 * @docs
 	 * ## License
-	 * ISC – see the [LICENSE](./LICENSE) file.
 	 */
-	it('LICENSE file exists', async () => {
+	it("ISC – see the [LICENSE](./LICENSE) file.", async () => {
 		/** @docs */
 		const text = await fs.loadDocument('LICENSE')
 		assert.ok(String(text).includes('ISC'))
-	})
-
-	it('package.json scripts contain required commands', () => {
-		const scripts = pkg.scripts || {}
-		assert.ok(scripts.build, 'Missing "build" script')
-		assert.ok(scripts.test, 'Missing "test" script')
-		// pre-commit can be defined as "pre-commit" or as a husky hook; we check both keys
-		assert.ok(
-			scripts['pre-commit'] || scripts.precommit,
-			'Missing "pre-commit" script'
-		)
 	})
 }
 

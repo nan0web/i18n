@@ -3,25 +3,9 @@
  *
  * Keys correspond to the original English UI strings.
  */
-const defaultVocab = {
+export const defaultVocab = {
 	"Welcome!": "Welcome, {name}!",
-	"User Form": "User Form",
-	"Submit": "Submit",
-	"Form submitted successfully!": "Form submitted successfully!",
-	"Validation failed!": "Validation failed!",
-	"Registration Form": "Registration Form",
-	"Username": "Username",
-	"Password": "Password",
-	"Confirm Password": "Confirm Password",
-	"Email or Telephone": "Email or Telephone",
-	"Currency Exchange": "Currency Exchange",
-	"From Currency": "From Currency",
-	"To Currency": "To Currency",
-	"Amount": "Amount",
-	"Top-up Telephone": "Top-up Telephone",
-	"Phone Number": "Phone Number",
-	"Top-up Amount": "Top-up Amount",
-	"Top-up Currency": "Top-up Currency",
+	"Try to use keys as default text": "This way it is no need to create default (English) version vocab",
 }
 
 /**
@@ -47,7 +31,63 @@ export function createT(vocab) {
 	}
 }
 
-/** Default translation function using the English vocabulary. */
-const t = createT(defaultVocab)
+/**
+ * Selects appropriate vocabulary dictionary by locale.
+ *
+ * @param {Array<readonly [string, string]> | Record<string, string> | Map<string, string>} mapLike
+ * @returns {(locale: string, defaultValue: Object<string, string>) => Object<string, string>}
+ */
+export function i18n(mapLike) {
+	let map = new Map()
+	if (mapLike instanceof Map) {
+		// Good
+		map = mapLike
+	}
+	else if (Array.isArray(mapLike)) {
+		const entries = mapLike
+		map = new Map(entries)
+	}
+	else if ("object" === typeof mapLike) {
+		map = new Map(Object.entries(mapLike))
+	}
+	else {
+		throw new TypeError([
+			"Map-like input required",
+			"- Array<readonly [string, string]>",
+			"- Record<string, string>",
+			"- Map<string, string>",
+		].join("\n"))
+	}
+	for (const [key] of map.entries()) {
+		if (5 === key.length) {
+			map.set(key.replace(/[^a-zA-Z]+/, ""), key)
+		}
+		if (key.length > 2) {
+			const short = key.slice(0, 2)
+			if (!map.has(short)) {
+				map.set(short, key)
+			}
+		}
+		// @todo add the fallback for non-localized languages, for instance:
+		// en-GB, en-US - if these are defined and the current locale en-NZ
+		// the first with en-* must be used
+		// I think to sort by keys (a.length - b.length) and check if does not match
+		// long key, try first 2 chars.
+	}
 
-export default t
+	return (locale = "en-GB", defaultValue = {}) => {
+		locale = locale.replace(/[^a-zA-Z]+/, "")
+		if (map.has(locale)) {
+			const value = map.get(locale)
+			return "string" === typeof value ? map.get(value) : value
+		}
+		locale = locale.slice(0, 2)
+		if (map.has(locale)) {
+			const value = map.get(locale)
+			return "string" === typeof value ? map.get(value) : value
+		}
+		return defaultValue
+	}
+}
+
+export default i18n
