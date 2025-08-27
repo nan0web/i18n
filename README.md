@@ -37,6 +37,27 @@ console.info(t('Welcome!', { name: 'Марія' })) // ← "Вітаємо, Ма
 t = createT(getVocab('unknown', en))
 console.info(t('Welcome!', { name: 'Fallback' })) // ← "Welcome, Fallback!"
 ```
+## Usage with Database
+
+For database-backed translations with hierarchical loading, use the `I18nDb` class:
+```js
+import { MemoryDB } from "@nan0web/test"
+import { I18nDb } from "@nan0web/i18n"
+// You can use any extension of "@nan0web/db"
+const db = new MemoryDB({
+	predefined: new Map([
+		['data/uk/_/t.json', { 'Welcome!': 'Ласкаво просимо!', 'Home': 'Дім' }],
+		['data/uk/apps/topup-tel/_/t.json', { 'Top-up Telephone': 'Поповнення телефону', 'Home': 'Головна' }]
+	])
+})
+await db.connect()
+const i18n = new I18nDb({ db, locale: 'uk', tPath: '_/t.json', dataDir: "data" })
+const t = await i18n.createT('uk', 'apps/topup-tel')
+
+console.info(t('Top-up Telephone')) // ← "Поповнення телефону"
+console.info(t('Welcome!')) // ← "Ласкаво просимо!" (inherited)
+console.info(t('Home')) // ← "Головна" (prioritized over inherited)
+```
 ## Keywords extractions
 
 You can also extract translation keys directly from your source code:

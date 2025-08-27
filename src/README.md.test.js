@@ -1,10 +1,10 @@
 import { describe, it, before, beforeEach, after } from 'node:test'
 import assert from 'node:assert/strict'
+import { spawn } from 'node:child_process'
 import DB from '@nan0web/db-fs'
 import { NoConsole } from "@nan0web/log"
-import { DocsParser } from "@nan0web/test"
-import { createT, extract, i18n } from './index.js'
-import { spawn } from 'node:child_process'
+import { DocsParser, MemoryDB } from "@nan0web/test"
+import { createT, extract, i18n, I18nDb } from './index.js'
 
 const fs = new DB()
 let pkg
@@ -77,6 +77,33 @@ function testRender() {
 			["info", "Привіт, Саша!"],
 			["info", "Вітаємо, Марія!"],
 			["info", "Welcome, Fallback!"],
+		])
+	})
+	/**
+	 * @docs
+	 * ## Usage with Database
+	 */
+	it('For database-backed translations with hierarchical loading, use the `I18nDb` class:', async () => {
+		//import { MemoryDB } from "@nan0web/test"
+		//import { I18nDb } from "@nan0web/i18n"
+		// You can use any extension of "@nan0web/db"
+		const db = new MemoryDB({
+			predefined: new Map([
+				['data/uk/_/t.json', { 'Welcome!': 'Ласкаво просимо!', 'Home': 'Дім' }],
+				['data/uk/apps/topup-tel/_/t.json', { 'Top-up Telephone': 'Поповнення телефону', 'Home': 'Головна' }]
+			])
+		})
+		await db.connect()
+		const i18n = new I18nDb({ db, locale: 'uk', tPath: '_/t.json', dataDir: "data" })
+		const t = await i18n.createT('uk', 'apps/topup-tel')
+
+		console.info(t('Top-up Telephone')) // ← "Поповнення телефону"
+		console.info(t('Welcome!')) // ← "Ласкаво просимо!" (inherited)
+		console.info(t('Home')) // ← "Головна" (prioritized over inherited)
+		assert.deepEqual(console.output(), [
+			["info", "Поповнення телефону"],
+			["info", "Ласкаво просимо!"],
+			["info", "Головна"]
 		])
 	})
 	/**
@@ -160,8 +187,8 @@ function testRender() {
 	 * ## Java•Script
 	 */
 	it("Uses `d.ts` to provide autocomplete hints.", () => {
-		assert.equal(pkg.types, "./types/index.d.ts")
-		assert.equal(pkg.scripts?.build, "tsc")
+		assert.equal(pkg.types, "types/index.d.ts")
+		assert.ok(String(pkg.scripts?.build).split(" ").includes("tsc"))
 	})
 	/**
 	 * @docs

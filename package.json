@@ -1,13 +1,19 @@
 {
 	"name": "@nan0web/i18n",
 	"version": "1.0.0",
-	"description": "A tiny, zero-dependency i18n helper for Java•Script projects",
+	"description": "A tiny, zero-dependency i18n helper for Java•Script",
 	"type": "module",
-	"types": "./types/index.d.ts",
+	"main": "src/index.js",
+	"types": "types/index.d.ts",
+	"bin": {
+		"i18n": "scripts/cli.js"
+	},
 	"scripts": {
-		"build": "tsc",
+		"i18n": "node scripts/cli.js audit && node scripts/cli.js sync",
+		"i18n:prod": "npx i18n audit && npx i18n sync",
 		"test": "node --test",
 		"test:coverage": "node --test --experimental-test-coverage --test-coverage-include=src/**/*.js",
+		"build": "tsc",
 		"playground": "node playground/main.js",
 		"pre-commit": "npm test",
 		"precommit": "npm test",
@@ -25,8 +31,13 @@
 	"packageManager": "pnpm@10.11.0",
 	"devDependencies": {
 		"@nan0web/db-fs": "workspace:*",
+		"@nan0web/event": "workspace:*",
 		"@nan0web/log": "workspace:*",
 		"@nan0web/test": "workspace:*",
 		"husky": "^9.1.7"
+	},
+	"peerDependencies": {
+		"@nan0web/event": "^1.0.0",
+		"@nan0web/db": "^1.0.0"
 	}
 }

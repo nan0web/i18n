@@ -24,7 +24,7 @@ export const defaultVocab = {
  */
 export function createT(vocab) {
 	return function t(key, vars = {}) {
-		const template = Object.prototype.hasOwnProperty.call(vocab, key) ? vocab[key] : key
+		const template = Object.hasOwn(vocab, key) ? vocab[key] : key
 		return template.replace(/{([^}]+)}/g, (_, name) =>
 			Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : `{${name}}`
 		)
@@ -58,33 +58,34 @@ export function i18n(mapLike) {
 			"- Map<string, string>",
 		].join("\n"))
 	}
-	for (const [key] of map.entries()) {
-		if (5 === key.length) {
-			map.set(key.replace(/[^a-zA-Z]+/, ""), key)
+
+	const normalize = key => key.replace(/[^a-zA-Z]+/g, "")
+
+	// Preprocess map to handle locale fallbacks
+	const processedMap = new Map()
+	for (const [key, value] of map.entries()) {
+		const cleanKey = normalize(key)
+		if ([2, 4].includes(cleanKey.length)) {
+			processedMap.set(cleanKey, value)
 		}
 		if (key.length > 2) {
 			const short = key.slice(0, 2)
-			if (!map.has(short)) {
-				map.set(short, key)
+			if (!processedMap.has(short)) {
+				processedMap.set(short, value)
 			}
 		}
-		// @todo add the fallback for non-localized languages, for instance:
-		// en-GB, en-US - if these are defined and the current locale en-NZ
-		// the first with en-* must be used
-		// I think to sort by keys (a.length - b.length) and check if does not match
-		// long key, try first 2 chars.
 	}
 
 	return (locale = "en-GB", defaultValue = {}) => {
-		locale = locale.replace(/[^a-zA-Z]+/, "")
-		if (map.has(locale)) {
-			const value = map.get(locale)
-			return "string" === typeof value ? map.get(value) : value
+		locale = normalize(locale)
+		if (processedMap.has(locale)) {
+			const value = processedMap.get(locale)
+			return "string" === typeof value ? processedMap.get(value) : value
 		}
 		locale = locale.slice(0, 2)
-		if (map.has(locale)) {
-			const value = map.get(locale)
-			return "string" === typeof value ? map.get(value) : value
+		if (processedMap.has(locale)) {
+			const value = processedMap.get(locale)
+			return "string" === typeof value ? processedMap.get(value) : value
 		}
 		return defaultValue
 	}
