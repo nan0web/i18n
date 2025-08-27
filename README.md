@@ -4,6 +4,9 @@ A tiny, zero‑dependency i18n helper for Java•Script projects.
 It provides a default English dictionary and a simple `createT` factory to
 generate translation functions for any language.
 
+This document is available in other languages:
+- [Ukrainian 🇺🇦](./docs/uk/README.md)
+
 ## Install
 ```bash
 npm install @nan0web/i18n

@@ -34,6 +34,9 @@ function testRender() {
 	 * A tiny, zero‑dependency i18n helper for Java•Script projects.
 	 * It provides a default English dictionary and a simple `createT` factory to
 	 * generate translation functions for any language.
+	 *
+	 * This document is available in other languages:
+	 * - [Ukrainian 🇺🇦](./docs/uk/README.md)
 	 */
 	it("## Install", () => {
 		/**
@@ -227,3 +230,17 @@ describe("Rendering README.md", async () => {
 		assert.ok(text.includes("## License"))
 	})
 })
+
+// describe("Testing translated README.md links", () => {
+// 	it("should include the correct language switch links in README.md", async () => {
+// 		const content = await fs.loadDocument("README.md")
+// 		assert.ok(content.includes("This document is available in other languages:"))
+// 		assert.ok(content.includes("- [Ukrainian 🇺🇦](./docs/uk/README.md)"))
+// 	})
+
+// 	it("should include the correct back-link in docs/uk/README.md", async () => {
+// 		const content = await fs.loadDocument("docs/uk/README.md")
+// 		assert.ok(content.includes("Цей документ доступний у інших мовах:"))
+// 		assert.ok(content.includes("- [English 🏴󠁧󠁢󠁥󠁮󠁧󠁿](../../README.md)"))
+// 	})
+// })
