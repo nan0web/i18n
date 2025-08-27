@@ -30,6 +30,7 @@
 	"license": "ISC",
 	"packageManager": "pnpm@10.11.0",
 	"devDependencies": {
+		"@nan0web/db": "workspace:*",
 		"@nan0web/db-fs": "workspace:*",
 		"@nan0web/event": "workspace:*",
 		"@nan0web/log": "workspace:*",
