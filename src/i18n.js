@@ -34,7 +34,7 @@ export function createT(vocab) {
 /**
  * Selects appropriate vocabulary dictionary by locale.
  *
- * @param {Array<readonly [string, string]> | Record<string, string> | Map<string, string>} mapLike
+ * @param {Array<readonly [string, string]> | Record<string, Record<string, string>> | Map<string, Record<string, string>>} mapLike
  * @returns {(locale: string, defaultValue: Object<string, string>) => Object<string, string>}
  */
 export function i18n(mapLike) {

@@ -7,14 +7,26 @@ generate translation functions for any language.
 This document is available in other languages:
 - [Ukrainian 🇺🇦](./docs/uk/README.md)
 
-## Install
+## Installation
+
+How to install with npm?
 ```bash
 npm install @nan0web/i18n
 ```
 
+How to install with pnpm?
+```bash
+pnpm add @nan0web/i18n
+```
+
+How to install with yarn?
+```bash
+yarn add @nan0web/i18n
+```
+
 ## Usage with Locale Detection
 
-For handling multiple dictionaries, you can create a vocab loader using the `i18n` utility:
+How to handle multiple dictionaries?
 ```js
 import { i18n, createT } from "@nan0web/i18n"
 
@@ -42,7 +54,7 @@ console.info(t('Welcome!', { name: 'Fallback' })) // ← "Welcome, Fallback!"
 ```
 ## Usage with Database
 
-For database-backed translations with hierarchical loading, use the `I18nDb` class:
+How to use database-backed translations with hierarchical loading, use the `I18nDb` class?
 ```js
 import { MemoryDB } from "@nan0web/test"
 import { I18nDb } from "@nan0web/i18n"
@@ -63,7 +75,7 @@ console.info(t('Home')) // ← "Головна" (prioritized over inherited)
 ```
 ## Keywords extractions
 
-You can also extract translation keys directly from your source code:
+How to extract translation keys directly from your source code?
 ```js
 const content = `
 console.log(t("Hello, {name}!"))
@@ -103,7 +115,7 @@ Utility function to select the appropriate vocabulary dictionary by locale.
 
 ## CLI Playground
 
-There is also a CLI sandbox playground to try the library directly:
+How to run a CLI sandbox playground to try the library directly?
 ```bash
 # Clone the repository and run the CLI playground
 git clone https://github.com/nan0web/i18n.git
@@ -118,8 +130,8 @@ Uses `d.ts` to provide autocomplete hints.
 
 ## Contributing
 
-Ready to contribute [check here](./CONTRIBUTING.md)
+How to contribute? - [check here](./CONTRIBUTING.md)
 
 ## License
 
-ISC – see the [LICENSE](./LICENSE) file.
+How to license? See the [ISC LICENSE](./LICENSE) file.

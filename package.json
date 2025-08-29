@@ -9,11 +9,12 @@
 		"i18n": "scripts/cli.js"
 	},
 	"scripts": {
+		"build": "tsc",
 		"i18n": "node scripts/cli.js audit && node scripts/cli.js sync",
 		"i18n:prod": "npx i18n audit && npx i18n sync",
-		"test": "node --test",
+		"test": "node --test src/**/*.test.js",
+		"test:docs": "node --test src/README.md.js",
 		"test:coverage": "node --test --experimental-test-coverage --test-coverage-include=src/**/*.js",
-		"build": "tsc",
 		"playground": "node playground/main.js",
 		"pre-commit": "npm test",
 		"precommit": "npm test",

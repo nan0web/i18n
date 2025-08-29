@@ -1,13 +1,13 @@
 import { describe, it, before, beforeEach, after } from 'node:test'
 import assert from 'node:assert/strict'
-import { spawn } from 'node:child_process'
 import DB from '@nan0web/db-fs'
 import { NoConsole } from "@nan0web/log"
-import { DocsParser, MemoryDB } from "@nan0web/test"
+import { DocsParser, MemoryDB, runSpawn, DatasetParser } from "@nan0web/test"
 import { createT, extract, i18n, I18nDb } from './index.js'
 
 const fs = new DB()
 let pkg
+let task = ''
 
 // Load package.json once before tests
 before(async () => {
@@ -15,7 +15,10 @@ before(async () => {
 	pkg = doc || {}
 })
 
-beforeEach(() => {
+let console = new NoConsole()
+
+beforeEach((info) => {
+	task = info.name
 	console = new NoConsole()
 })
 
@@ -37,8 +40,10 @@ function testRender() {
 	 *
 	 * This document is available in other languages:
 	 * - [Ukrainian 🇺🇦](./docs/uk/README.md)
+	 *
+	 * ## Installation
 	 */
-	it("## Install", () => {
+	it("How to install with npm?", () => {
 		/**
 		 * ```bash
 		 * npm install @nan0web/i18n
@@ -48,9 +53,31 @@ function testRender() {
 	})
 	/**
 	 * @docs
+	 */
+	it("How to install with pnpm?", () => {
+		/**
+		 * ```bash
+		 * pnpm add @nan0web/i18n
+		 * ```
+		 */
+		assert.equal(pkg.name, "@nan0web/i18n")
+	})
+	/**
+	 * @docs
+	 */
+	it("How to install with yarn?", () => {
+		/**
+		 * ```bash
+		 * yarn add @nan0web/i18n
+		 * ```
+		 */
+		assert.equal(pkg.name, "@nan0web/i18n")
+	})
+	/**
+	 * @docs
 	 * ## Usage with Locale Detection
 	 */
-	it('For handling multiple dictionaries, you can create a vocab loader using the `i18n` utility:', () => {
+	it('How to handle multiple dictionaries?', () => {
 		//import { i18n, createT } from "@nan0web/i18n"
 
 		const en = { "Welcome!": "Welcome, {name}!" }
@@ -86,7 +113,7 @@ function testRender() {
 	 * @docs
 	 * ## Usage with Database
 	 */
-	it('For database-backed translations with hierarchical loading, use the `I18nDb` class:', async () => {
+	it('How to use database-backed translations with hierarchical loading, use the `I18nDb` class?', async () => {
 		//import { MemoryDB } from "@nan0web/test"
 		//import { I18nDb } from "@nan0web/i18n"
 		// You can use any extension of "@nan0web/db"
@@ -113,7 +140,7 @@ function testRender() {
 	 * @docs
 	 * ## Keywords extractions
 	 */
-	it("You can also extract translation keys directly from your source code:", () => {
+	it("How to extract translation keys directly from your source code?", () => {
 		const content = `
 		console.log(t("Hello, {name}!"))
 		const menu = ["First", "Second"] // t("First"), t("Second")
@@ -157,7 +184,7 @@ function testRender() {
 	 *
 	 * ## CLI Playground
 	 */
-	it("There is also a CLI sandbox playground to try the library directly:", () => {
+	it("How to run a CLI sandbox playground to try the library directly?", async () => {
 		/**
 		 * ```bash
 		 * # Clone the repository and run the CLI playground
@@ -168,22 +195,9 @@ function testRender() {
 		 * ```
 		 */
 		assert.ok(String(pkg.scripts?.playground).includes("node playground"))
-
-		// Spawn process to check git remote URL
-		const result = spawn('git', ['remote', 'get-url', 'origin'])
-		let output = ''
-
-		result.stdout.on('data', (data) => {
-			output += data.toString()
-		})
-
-		result.on('close', (code) => {
-			if (code === 0) {
-				assert.ok(output.trim().endsWith(':nan0web/i18n.git'))
-			} else {
-				assert.ok(false, "git command fails (e.g., not in a git repo)")
-			}
-		})
+		const response = await runSpawn('git', ['remote', 'get-url', 'origin'])
+		assert.ok(response.code === 0, "git command fails (e.g., not in a git repo)")
+		assert.ok(response.text.trim().endsWith(':nan0web/i18n.git'))
 	})
 	/**
 	 * @docs
@@ -197,7 +211,7 @@ function testRender() {
 	 * @docs
 	 * ## Contributing
 	 */
-	it("Ready to contribute [check here](./CONTRIBUTING.md)", async () => {
+	it("How to contribute? - [check here](./CONTRIBUTING.md)", async () => {
 		assert.equal(pkg.scripts?.precommit, "npm test")
 		assert.equal(pkg.scripts?.prepush, "npm test")
 		assert.equal(pkg.scripts?.prepare, "husky")
@@ -209,7 +223,7 @@ function testRender() {
 	 * @docs
 	 * ## License
 	 */
-	it("ISC – see the [LICENSE](./LICENSE) file.", async () => {
+	it("How to license? See the [ISC LICENSE](./LICENSE) file.", async () => {
 		/** @docs */
 		const text = await fs.loadDocument('LICENSE')
 		assert.ok(String(text).includes('ISC'))
@@ -224,6 +238,8 @@ describe("Rendering README.md", async () => {
 	const parser = new DocsParser()
 	text = String(parser.decode(testRender))
 	await fs.saveDocument("README.md", text)
+	const dataset = DatasetParser.parse(text, pkg.name)
+	await fs.saveDocument(".datasets/README.dataset.jsonl", dataset)
 
 	it(`document is rendered in README.md [${format(Buffer.byteLength(text))}b]`, async () => {
 		const text = await fs.loadDocument("README.md")
