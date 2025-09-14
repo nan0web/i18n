@@ -1,7 +1,7 @@
 /**
  * Creates a translation function bound to a specific vocabulary.
  *
- * @param {Object<string,string>} vocab - Mapping from keys to localized strings.
+ * @param {Object<string, string> | Map<string, string>} vocab - Mapping from keys to localized strings.
  * @returns {(key:string, vars?:Object<string,string|number>)=>string} Translation function.
  *
  * The returned function looks up the key in the supplied vocabulary.
@@ -14,7 +14,7 @@
  */
 export function createT(vocab: {
     [x: string]: string;
-}): (key: string, vars?: {
+} | Map<string, string>): (key: string, vars?: {
     [x: string]: string | number;
 }) => string;
 /**

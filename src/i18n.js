@@ -11,7 +11,7 @@ export const defaultVocab = {
 /**
  * Creates a translation function bound to a specific vocabulary.
  *
- * @param {Object<string,string>} vocab - Mapping from keys to localized strings.
+ * @param {Object<string, string> | Map<string, string>} vocab - Mapping from keys to localized strings.
  * @returns {(key:string, vars?:Object<string,string|number>)=>string} Translation function.
  *
  * The returned function looks up the key in the supplied vocabulary.
@@ -23,8 +23,12 @@ export const defaultVocab = {
  *   t("Hello {name}", { name: "Іван" }) // → "Іван, вітаю!"
  */
 export function createT(vocab) {
+	let map = new Map()
+	if (!(vocab instanceof Map)) {
+		map = new Map(Array.isArray(vocab) ? vocab : Object.entries(vocab))
+	}
 	return function t(key, vars = {}) {
-		const template = Object.hasOwn(vocab, key) ? vocab[key] : key
+		const template = map.get(key) ?? key
 		return template.replace(/{([^}]+)}/g, (_, name) =>
 			Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : `{${name}}`
 		)

@@ -27,7 +27,7 @@ export default class I18nDb {
         useKeyAsDefault?: string | undefined;
         langs?: Record<string, Record<string, string>> | undefined;
     });
-    db: import("@nan0web/db/types/DB.js").default;
+    db: import("@nan0web/db").default;
     locale: string;
     tPath: string;
     langsPath: string;

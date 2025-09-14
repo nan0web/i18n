@@ -1,4 +1,4 @@
-import { describe, it, before, beforeEach, after } from 'node:test'
+import { describe, it, before, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
 import DB from '@nan0web/db-fs'
 import { NoConsole } from "@nan0web/log"
@@ -7,7 +7,6 @@ import { createT, extract, i18n, I18nDb } from './index.js'
 
 const fs = new DB()
 let pkg
-let task = ''
 
 // Load package.json once before tests
 before(async () => {
@@ -17,8 +16,7 @@ before(async () => {
 
 let console = new NoConsole()
 
-beforeEach((info) => {
-	task = info.name
+beforeEach(() => {
 	console = new NoConsole()
 })
 
@@ -223,7 +221,7 @@ function testRender() {
 	 * @docs
 	 * ## License
 	 */
-	it("How to license? See the [ISC LICENSE](./LICENSE) file.", async () => {
+	it("How to license? - [ISC LICENSE](./LICENSE) file.", async () => {
 		/** @docs */
 		const text = await fs.loadDocument('LICENSE')
 		assert.ok(String(text).includes('ISC'))
@@ -246,17 +244,3 @@ describe("Rendering README.md", async () => {
 		assert.ok(text.includes("## License"))
 	})
 })
-
-// describe("Testing translated README.md links", () => {
-// 	it("should include the correct language switch links in README.md", async () => {
-// 		const content = await fs.loadDocument("README.md")
-// 		assert.ok(content.includes("This document is available in other languages:"))
-// 		assert.ok(content.includes("- [Ukrainian 🇺🇦](./docs/uk/README.md)"))
-// 	})
-
-// 	it("should include the correct back-link in docs/uk/README.md", async () => {
-// 		const content = await fs.loadDocument("docs/uk/README.md")
-// 		assert.ok(content.includes("Цей документ доступний у інших мовах:"))
-// 		assert.ok(content.includes("- [English 🏴󠁧󠁢󠁥󠁮󠁧󠁿](../../README.md)"))
-// 	})
-// })
