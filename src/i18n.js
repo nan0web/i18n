@@ -23,10 +23,8 @@ export const defaultVocab = {
  *   t("Hello {name}", { name: "Іван" }) // → "Іван, вітаю!"
  */
 export function createT(vocab) {
-	let map = new Map()
-	if (!(vocab instanceof Map)) {
-		map = new Map(Array.isArray(vocab) ? vocab : Object.entries(vocab))
-	}
+	const map = vocab instanceof Map ? vocab
+		: new Map(Array.isArray(vocab) ? vocab : Object.entries(vocab))
 	return function t(key, vars = {}) {
 		const template = map.get(key) ?? key
 		return template.replace(/{([^}]+)}/g, (_, name) =>

@@ -4,8 +4,9 @@ A tiny, zero‑dependency i18n helper for Java•Script projects.
 It provides a default English dictionary and a simple `createT` factory to
 generate translation functions for any language.
 
-This document is available in other languages:
-- [Ukrainian 🇺🇦](./docs/uk/README.md)
+|[Status](https://github.com/nan0web/monorepo/blob/main/system.md#написання-сценаріїв)|Documentation|Test coverage|Features|Npm version|
+|---|---|---|---|---|
+ |🟢 `99.7%` |🧪 [English 🏴󠁧󠁢󠁥󠁮󠁧󠁿](https://github.com/nan0web/i18n/blob/main/README.md)<br />[Українською 🇺🇦](https://github.com/nan0web/i18n/blob/main/docs/uk/README.md) |🟢 `100.0%` |✅ d.ts 📜 system.md 🕹️ playground |— |
 
 ## Installation
 
@@ -121,7 +122,7 @@ How to run a CLI sandbox playground to try the library directly?
 git clone https://github.com/nan0web/i18n.git
 cd i18n
 npm install
-npm run playground
+npm run play
 ```
 
 ## Java•Script
@@ -134,4 +135,4 @@ How to contribute? - [check here](./CONTRIBUTING.md)
 
 ## License
 
-How to license? See the [ISC LICENSE](./LICENSE) file.
+How to license? - [ISC LICENSE](./LICENSE) file.

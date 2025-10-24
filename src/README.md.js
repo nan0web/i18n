@@ -36,8 +36,7 @@ function testRender() {
 	 * It provides a default English dictionary and a simple `createT` factory to
 	 * generate translation functions for any language.
 	 *
-	 * This document is available in other languages:
-	 * - [Ukrainian 🇺🇦](./docs/uk/README.md)
+	 * <!-- %PACKAGE_STATUS% -->
 	 *
 	 * ## Installation
 	 */
@@ -189,10 +188,10 @@ function testRender() {
 		 * git clone https://github.com/nan0web/i18n.git
 		 * cd i18n
 		 * npm install
-		 * npm run playground
+		 * npm run play
 		 * ```
 		 */
-		assert.ok(String(pkg.scripts?.playground).includes("node playground"))
+		assert.ok(String(pkg.scripts?.play).includes("node play"))
 		const response = await runSpawn('git', ['remote', 'get-url', 'origin'])
 		assert.ok(response.code === 0, "git command fails (e.g., not in a git repo)")
 		assert.ok(response.text.trim().endsWith(':nan0web/i18n.git'))

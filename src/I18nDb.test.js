@@ -1,6 +1,6 @@
 import { beforeEach, describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
-import { MemoryDB } from '@nan0web/test'
+import DB from '@nan0web/db'
 import I18nDb from './I18nDb.js'
 
 const predefined = new Map([
@@ -16,14 +16,14 @@ const i18nDbOptions = {
 }
 
 describe('I18nDb', () => {
-	/** @type {MemoryDB} */
+	/** @type {DB} */
 	let db
 	/** @type {I18nDb} */
 	let i18n
 
 	beforeEach(async () => {
 		// Create a completely new db instance
-		db = new MemoryDB({ predefined })
+		db = new DB({ predefined })
 		await db.connect()
 		i18n = new I18nDb({ ...i18nDbOptions, db })
 		await i18n.connect()
@@ -72,7 +72,7 @@ describe('I18nDb', () => {
 		assert.equal(t1('Top-up Telephone'), 'Поповнення телефону')
 
 		// recreate DB and I18n instance
-		db = new MemoryDB({
+		db = new DB({
 			predefined: new Map([
 				['data/uk/_/t', { 'Welcome!': 'Ласкаво просимо!', 'Home': 'Дім' }],
 				['data/uk/apps/topup-tel/_/t', { 'Top-up Telephone': 'Поповнення телефону [updated]', 'Home': 'Головна [updated]' }]
@@ -98,7 +98,7 @@ describe('I18nDb', () => {
 		// Mock some code content with translation keys
 		const map = new Map(predefined)
 		map.set('src/example.js', `t("New Feature")\nt("Another New Key")`)
-		const db = new MemoryDB({ predefined: map })
+		const db = new DB({ predefined: map })
 		await db.connect()
 
 		const i18n = new I18nDb({ ...i18nDbOptions, db })
@@ -115,7 +115,7 @@ describe('I18nDb', () => {
 		const map = new Map(predefined)
 		// Mock some code content with translation keys
 		map.set('src/example.js', `t("New Feature")\nt("Another New Key")`)
-		const db = new MemoryDB({ predefined: map })
+		const db = new DB({ predefined: map })
 		await db.connect()
 
 		const i18n = new I18nDb({ ...i18nDbOptions, db })
@@ -131,7 +131,7 @@ describe('I18nDb', () => {
 		const map = new Map(predefined)
 		// Mock some code content with translation keys
 		map.set('src/example.js', `t("New Feature")\nt("Another New Key")`)
-		const db = new MemoryDB({ predefined: map })
+		const db = new DB({ predefined: map })
 		await db.connect()
 
 		const i18n = new I18nDb({ ...i18nDbOptions, db })
@@ -156,7 +156,7 @@ describe('I18nDb', () => {
 		let emittedError = null
 
 		// Create a db that will throw an error
-		const dbWithError = new MemoryDB({ predefined })
+		const dbWithError = new DB({ predefined })
 		dbWithError.loadDocument = async (path) => {
 			if (path.includes('missing')) {
 				throw new Error('File not found')
@@ -182,7 +182,7 @@ describe('I18nDb', () => {
 		map.set('src/example.js', `t("Used Key")\nt("Another Used Key")`)
 		map.set('data/uk/_/t.json', { 'Used Key': 'Використаний ключ', 'Unused Key': 'Невикористаний ключ' })
 
-		const db = new MemoryDB({ predefined: map })
+		const db = new DB({ predefined: map })
 		await db.connect()
 
 		const i18n = new I18nDb({ ...i18nDbOptions, db })
@@ -199,7 +199,7 @@ describe('I18nDb', () => {
 		map.set('data/_/langs.json', { uk: "Ukrainian", en: "English" })
 		map.set('src/example.js', `t("Global Key")`)
 
-		const db = new MemoryDB({ predefined: map })
+		const db = new DB({ predefined: map })
 		await db.connect()
 
 		const i18n = new I18nDb({ ...i18nDbOptions, db })
