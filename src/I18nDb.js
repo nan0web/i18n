@@ -96,7 +96,9 @@ export default class I18nDb {
 
 		// Collect from all parent `.../tPath`
 		for (let i = 1; i <= segments.length; i++) {
-			const dirPath = [this.dataPath, ...segments.slice(0, i), this.tPath].join('/')
+			const dirPath = [
+				this.dataPath, ...segments.slice(0, i), this.tPath
+			].filter(Boolean).join('/').replace(/\/{2,}/g, "/")
 			try {
 				const partial = await this.db.loadDocument(dirPath, {})
 				Object.assign(vocab, partial)

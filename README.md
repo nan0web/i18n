@@ -57,10 +57,10 @@ console.info(t('Welcome!', { name: 'Fallback' })) // ← "Welcome, Fallback!"
 
 How to use database-backed translations with hierarchical loading, use the `I18nDb` class?
 ```js
-import { MemoryDB } from "@nan0web/test"
+import DB from "@nan0web/db"
 import { I18nDb } from "@nan0web/i18n"
 // You can use any extension of "@nan0web/db"
-const db = new MemoryDB({
+const db = new DB({
 	predefined: new Map([
 		['data/uk/_/t.json', { 'Welcome!': 'Ласкаво просимо!', 'Home': 'Дім' }],
 		['data/uk/apps/topup-tel/_/t.json', { 'Top-up Telephone': 'Поповнення телефону', 'Home': 'Головна' }]

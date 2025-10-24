@@ -1,11 +1,12 @@
 import { describe, it, before, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
-import DB from '@nan0web/db-fs'
+import DB from '@nan0web/db'
+import FS from '@nan0web/db-fs'
 import { NoConsole } from "@nan0web/log"
-import { DocsParser, MemoryDB, runSpawn, DatasetParser } from "@nan0web/test"
+import { DocsParser, runSpawn, DatasetParser } from "@nan0web/test"
 import { createT, extract, i18n, I18nDb } from './index.js'
 
-const fs = new DB()
+const fs = new FS()
 let pkg
 
 // Load package.json once before tests
@@ -111,10 +112,10 @@ function testRender() {
 	 * ## Usage with Database
 	 */
 	it('How to use database-backed translations with hierarchical loading, use the `I18nDb` class?', async () => {
-		//import { MemoryDB } from "@nan0web/test"
+		//import DB from "@nan0web/db"
 		//import { I18nDb } from "@nan0web/i18n"
 		// You can use any extension of "@nan0web/db"
-		const db = new MemoryDB({
+		const db = new DB({
 			predefined: new Map([
 				['data/uk/_/t.json', { 'Welcome!': 'Ласкаво просимо!', 'Home': 'Дім' }],
 				['data/uk/apps/topup-tel/_/t.json', { 'Top-up Telephone': 'Поповнення телефону', 'Home': 'Головна' }]
