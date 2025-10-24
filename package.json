@@ -50,6 +50,6 @@
 	},
 	"peerDependencies": {
 		"@nan0web/event": "^1.0.0",
-		"@nan0web/db": "^1.0.0"
+		"@nan0web/db": "^1.0.2"
 	}
 }
