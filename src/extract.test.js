@@ -1,7 +1,7 @@
-import { describe, it } from "node:test"
-import extract from "./extract.js"
+import { describe, it } from 'node:test'
+import extract from './extract.js'
 
-describe("extract()", () => {
+describe('extract()', () => {
 	it('should extract keys from t("...") calls', () => {
 		const content = `
     t("Welcome!")
@@ -54,5 +54,4 @@ describe("extract()", () => {
 		console.assert(keys.includes('Say "hello"'))
 		console.assert(keys.includes('Backtick "` and \'` quotes'))
 	})
-
 })

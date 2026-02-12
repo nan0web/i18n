@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { fileURLToPath } from "node:url"
+import { fileURLToPath } from 'node:url'
 
 import DBFS from '@nan0web/db-fs'
 import I18nDb from '../src/I18nDb.js'
@@ -13,7 +13,7 @@ export default async function sync() {
 	const db = new DBFS()
 	await db.connect()
 
-	const i18n = new I18nDb({ db, locale: 'uk', tPath: '_/t.json', dataDir: "data", srcDir: "src" })
+	const i18n = new I18nDb({ db, locale: 'uk', tPath: '_/t.json', dataDir: 'data', srcDir: 'src' })
 	await i18n.connect()
 
 	await i18n.syncTranslationsAll()

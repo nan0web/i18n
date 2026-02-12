@@ -3,6 +3,10 @@ import extract from './extract.js'
 import event from '@nan0web/event'
 
 /**
+ * @typedef {function(string, Record<string, string|number>=): string} TFunction
+ */
+
+/**
  * I18nDb — i18n manager that uses DB for loading vocabs
  * Supports hierarchical loading, reactive updates and configurable t.json path.
  */
@@ -24,11 +28,11 @@ export default class I18nDb {
 		const {
 			db,
 			emitter,
-			locale = "en",
-			tPath = "_/t",
-			langsPath = "_/langs",
-			dataDir = "data",
-			srcDir = "src",
+			locale = 'en',
+			tPath = '_/t',
+			langsPath = '_/langs',
+			dataDir = 'data',
+			srcDir = 'src',
 			langs = {},
 			useKeyAsDefault = false,
 		} = input
@@ -37,8 +41,8 @@ export default class I18nDb {
 		this.locale = locale
 		this.tPath = tPath
 		this.langsPath = langsPath
-		this.dataDir = dataDir.endsWith("/") ? dataDir.slice(0, -1) : dataDir
-		this.srcDir = srcDir.endsWith("/") ? srcDir.slice(0, -1) : srcDir
+		this.dataDir = dataDir.endsWith('/') ? dataDir.slice(0, -1) : dataDir
+		this.srcDir = srcDir.endsWith('/') ? srcDir.slice(0, -1) : srcDir
 		this.langs = langs
 		this.useKeyAsDefault = Boolean(useKeyAsDefault)
 
@@ -70,7 +74,7 @@ export default class I18nDb {
 	 * @returns {string}
 	 */
 	get dataPath() {
-		return this.dataDir + "/"
+		return this.dataDir + '/'
 	}
 
 	/**
@@ -78,7 +82,7 @@ export default class I18nDb {
 	 * @returns {string}
 	 */
 	get srcPath() {
-		return this.srcDir + "/"
+		return this.srcDir + '/'
 	}
 
 	/**
@@ -96,15 +100,16 @@ export default class I18nDb {
 
 		// Collect from all parent `.../tPath`
 		for (let i = 1; i <= segments.length; i++) {
-			const dirPath = [
-				this.dataPath, ...segments.slice(0, i), this.tPath
-			].filter(Boolean).join('/').replace(/\/{2,}/g, "/")
+			const dirPath = [this.dataPath, ...segments.slice(0, i), this.tPath]
+				.filter(Boolean)
+				.join('/')
+				.replace(/\/{2,}/g, '/')
 			try {
 				const partial = await this.db.loadDocument(dirPath, {})
 				Object.assign(vocab, partial)
 			} catch (err) {
 				// Continue even if file is missing
-				this.emitter.emit("error", err)
+				this.emitter.emit('error', err)
 			}
 		}
 
@@ -118,9 +123,9 @@ export default class I18nDb {
 	 * Get translation function for a given context (path).
 	 * @param {string} locale
 	 * @param {string} uri
-	 * @returns {Promise<function>}
+	 * @returns {Promise<TFunction>}
 	 */
-	async createT(locale, uri = "") {
+	async createT(locale, uri = '') {
 		if (this._tFunctions.has(uri)) return this._tFunctions.get(uri)
 
 		const url = this.db.resolveSync(locale, uri)
@@ -174,7 +179,7 @@ export default class I18nDb {
 			const content = await this.db.loadDocument(entry.file.path)
 			if (typeof content !== 'string') continue // skip non-string data
 
-			extract(content).forEach(key => keys.add(key))
+			extract(content).forEach((key) => keys.add(key))
 		}
 		return keys
 	}
@@ -191,8 +196,8 @@ export default class I18nDb {
 			const vocab = await this.loadT(locale)
 
 			const existingKeys = new Set(Object.keys(vocab))
-			const missing = [...codeKeys].filter(key => !existingKeys.has(key))
-			const unused = Object.keys(vocab).filter(key => !codeKeys.has(key))
+			const missing = [...codeKeys].filter((key) => !existingKeys.has(key))
+			const unused = Object.keys(vocab).filter((key) => !codeKeys.has(key))
 
 			map.set(locale, { missing, unused })
 		}
@@ -206,9 +211,9 @@ export default class I18nDb {
 	 * @param {string} [opts.srcPath] - path to source directory (e.g. 'src/'), defaults to this.srcDir
 	 * @param {Set<string>} [opts.codeKeys] - translation keys
 	 * @param {string} [opts.useKeyAsDefault]
-	 * @returns {Promise<Record<string,string>>}
+	 * @returns {Promise<{ codeKeys: string[] }>}
 	 */
-	async syncTranslations(targetUri = "", opts = {}) {
+	async syncTranslations(targetUri = '', opts = {}) {
 		const {
 			useKeyAsDefault = this.useKeyAsDefault,
 			srcPath = this.srcPath,
@@ -222,18 +227,28 @@ export default class I18nDb {
 
 			for (const key of codeKeys) {
 				if (vocab[key] === undefined) {
-					vocab[key] = useKeyAsDefault ? key : ""
+					vocab[key] = useKeyAsDefault ? key : ''
 					updated = true
 				}
 			}
 
 			if (updated) {
 				await this.db.saveDocument(tJsonPath, vocab)
-				this._cache.delete(`${locale}/${targetUri}`)   // clear cache
+				this._cache.delete(`${locale}/${targetUri}`) // clear cache
 				this._tFunctions.delete(`${locale}/${targetUri}`) // invalidate t()
 			}
 		}
 
-		return {}
+		return { codeKeys: [...codeKeys] }
+	}
+
+	/**
+	 * Sync translations for all locales at the root level.
+	 *
+	 * @param {Object} [opts] Options for syncTranslations.
+	 * @returns {Promise<{ codeKeys: string[] }>}
+	 */
+	async syncTranslationsAll(opts = {}) {
+		return this.syncTranslations('', opts)
 	}
 }

@@ -2,7 +2,7 @@
  * Creates a translation function bound to a specific vocabulary.
  *
  * @param {Object<string, string> | Map<string, string>} vocab - Mapping from keys to localized strings.
- * @returns {(key:string, vars?:Object<string,string|number>)=>string} Translation function.
+ * @returns {import("./I18nDb").TFunction} Translation function.
  *
  * The returned function looks up the key in the supplied vocabulary.
  * If the key is missing, it returns the original key.
@@ -14,9 +14,7 @@
  */
 export function createT(vocab: {
     [x: string]: string;
-} | Map<string, string>): (key: string, vars?: {
-    [x: string]: string | number;
-}) => string;
+} | Map<string, string>): import("./I18nDb").TFunction;
 /**
  * Selects appropriate vocabulary dictionary by locale.
  *
@@ -34,7 +32,7 @@ export function i18n(mapLike: Array<readonly [string, string]> | Record<string, 
  * Keys correspond to the original English UI strings.
  */
 export const defaultVocab: {
-    "Welcome!": string;
-    "Try to use keys as default text": string;
+    'Welcome!': string;
+    'Try to use keys as default text': string;
 };
 export default i18n;

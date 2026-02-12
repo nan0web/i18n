@@ -4,15 +4,16 @@
  * Keys correspond to the original English UI strings.
  */
 export const defaultVocab = {
-	"Welcome!": "Welcome, {name}!",
-	"Try to use keys as default text": "This way it is no need to create default (English) version vocab",
+	'Welcome!': 'Welcome, {name}!',
+	'Try to use keys as default text':
+		'This way it is no need to create default (English) version vocab',
 }
 
 /**
  * Creates a translation function bound to a specific vocabulary.
  *
  * @param {Object<string, string> | Map<string, string>} vocab - Mapping from keys to localized strings.
- * @returns {(key:string, vars?:Object<string,string|number>)=>string} Translation function.
+ * @returns {import("./I18nDb").TFunction} Translation function.
  *
  * The returned function looks up the key in the supplied vocabulary.
  * If the key is missing, it returns the original key.
@@ -23,12 +24,12 @@ export const defaultVocab = {
  *   t("Hello {name}", { name: "Іван" }) // → "Іван, вітаю!"
  */
 export function createT(vocab) {
-	const map = vocab instanceof Map ? vocab
-		: new Map(Array.isArray(vocab) ? vocab : Object.entries(vocab))
+	const map =
+		vocab instanceof Map ? vocab : new Map(Array.isArray(vocab) ? vocab : Object.entries(vocab))
 	return function t(key, vars = {}) {
-		const template = map.get(key) ?? key
+		const template = String(map.get(key) ?? key)
 		return template.replace(/{([^}]+)}/g, (_, name) =>
-			Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : `{${name}}`
+			Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : `{${name}}`,
 		)
 	}
 }
@@ -44,24 +45,23 @@ export function i18n(mapLike) {
 	if (mapLike instanceof Map) {
 		// Good
 		map = mapLike
-	}
-	else if (Array.isArray(mapLike)) {
+	} else if (Array.isArray(mapLike)) {
 		const entries = mapLike
 		map = new Map(entries)
-	}
-	else if ("object" === typeof mapLike) {
+	} else if ('object' === typeof mapLike) {
 		map = new Map(Object.entries(mapLike))
-	}
-	else {
-		throw new TypeError([
-			"Map-like input required",
-			"- Array<readonly [string, string]>",
-			"- Record<string, string>",
-			"- Map<string, string>",
-		].join("\n"))
+	} else {
+		throw new TypeError(
+			[
+				'Map-like input required',
+				'- Array<readonly [string, string]>',
+				'- Record<string, string>',
+				'- Map<string, string>',
+			].join('\n'),
+		)
 	}
 
-	const normalize = key => key.replace(/[^a-zA-Z]+/g, "")
+	const normalize = (key) => key.replace(/[^a-zA-Z]+/g, '')
 
 	// Preprocess map to handle locale fallbacks
 	const processedMap = new Map()
@@ -78,16 +78,16 @@ export function i18n(mapLike) {
 		}
 	}
 
-	return (locale = "en-GB", defaultValue = {}) => {
+	return (locale = 'en-GB', defaultValue = {}) => {
 		locale = normalize(locale)
 		if (processedMap.has(locale)) {
 			const value = processedMap.get(locale)
-			return "string" === typeof value ? processedMap.get(value) : value
+			return 'string' === typeof value ? processedMap.get(value) : value
 		}
 		locale = locale.slice(0, 2)
 		if (processedMap.has(locale)) {
 			const value = processedMap.get(locale)
-			return "string" === typeof value ? processedMap.get(value) : value
+			return 'string' === typeof value ? processedMap.get(value) : value
 		}
 		return defaultValue
 	}

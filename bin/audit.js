@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import { fileURLToPath } from "node:url"
+import { fileURLToPath } from 'node:url'
 
 import DBFS from '@nan0web/db-fs'
-import I18nDb from '../src/I18nDb.js'
+import { I18nDb } from '@nan0web/i18n'
 
 /**
  * @function audit
@@ -13,7 +13,7 @@ export default async function audit() {
 	const db = new DBFS()
 	await db.connect()
 
-	const i18n = new I18nDb({ db, tPath: '_/t.json', dataDir: "data", srcDir: "src" })
+	const i18n = new I18nDb({ db, tPath: '_/t.json', dataDir: 'data', srcDir: 'src' })
 	await i18n.connect()
 
 	for (const locale of i18n.locales) {
@@ -34,7 +34,7 @@ export default async function audit() {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-	audit().catch(err => {
+	audit().catch((err) => {
 		console.error(err)
 		process.exit(1)
 	})

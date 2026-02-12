@@ -6,7 +6,7 @@
 	"main": "src/index.js",
 	"types": "types/index.d.ts",
 	"bin": {
-		"i18n": "scripts/cli.js"
+		"i18n": "bin/i18n.js"
 	},
 	"files": [
 		"src/**/*.js",
@@ -14,15 +14,19 @@
 		"types/**/*.d.ts"
 	],
 	"scripts": {
-		"i18n": "node scripts/cli.js audit && node scripts/cli.js sync",
+		"postinstall": "node bin/postinstall.js",
+		"i18n": "node bin/i18n.js audit && node bin/i18n.js sync",
 		"i18n:prod": "npx i18n audit && npx i18n sync",
 		"build": "tsc",
+		"audit": "pnpm audit --audit-level=moderate",
 		"test": "node --test \"src/**/*.test.js\" | nan0test parse --fail",
+		"test:all": "pnpm test && pnpm run test:docs && pnpm build && pnpm run audit && pnpm run knip",
 		"test:coverage": "node --experimental-test-coverage --test-coverage-include=\"src/**/*.js\" --test-coverage-exclude=\"src/**/*.test.js\" --test \"src/**/*.test.js\"",
 		"test:coverage:collect": "nan0test coverage",
 		"test:docs": "node --test src/README.md.js",
 		"test:release": "node --test \"releases/**/*.test.js\"",
 		"test:status": "nan0test status --hide-name --debug",
+		"knip": "knip --production",
 		"play": "node play/main.js",
 		"precommit": "npm test",
 		"prepush": "npm test",
@@ -44,12 +48,13 @@
 		"@nan0web/db": "^1.0.2",
 		"@nan0web/db-fs": "^1.0.0",
 		"@nan0web/event": "^1.0.0",
-		"@nan0web/log": "^1.0.0",
-		"@nan0web/test": "^1.0.2",
-		"husky": "^9.1.7"
+		"@nan0web/log": "^1.1.1",
+		"@nan0web/test": "^1.1.3",
+		"husky": "^9.1.7",
+		"knip": "^5.0.0"
 	},
 	"peerDependencies": {
-		"@nan0web/event": "^1.0.0",
-		"@nan0web/db": "^1.0.2"
+		"@nan0web/db": "^1.0.2",
+		"@nan0web/event": "^1.0.0"
 	}
 }

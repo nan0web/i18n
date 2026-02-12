@@ -1,4 +1,7 @@
 /**
+ * @typedef {function(string, Record<string, string|number>=): string} TFunction
+ */
+/**
  * I18nDb — i18n manager that uses DB for loading vocabs
  * Supports hierarchical loading, reactive updates and configurable t.json path.
  */
@@ -68,16 +71,16 @@ export default class I18nDb {
      * Get translation function for a given context (path).
      * @param {string} locale
      * @param {string} uri
-     * @returns {Promise<function>}
+     * @returns {Promise<TFunction>}
      */
-    createT(locale: string, uri?: string): Promise<Function>;
+    createT(locale: string, uri?: string): Promise<TFunction>;
     /**
      * Change current locale and emit 'i18nchange'
      * @param {string} locale
      * @param {string} [atUri="/"] base path for reloading
      * @returns {Promise<void>}
      */
-    setLocale(locale: string, atUri?: string | undefined): Promise<void>;
+    setLocale(locale: string, atUri?: string): Promise<void>;
     /**
      * Shortcut: switchTo('uk', 'apps/topup-tel')
      * Equivalent to setLocale + createT
@@ -97,7 +100,7 @@ export default class I18nDb {
      * @param {string} [srcPath] - path to source directory (e.g. 'src/'), defaults to this.srcDir
      * @returns {Promise<Map<string, {missing: string[], unused: string[]}>>}
      */
-    auditTranslations(srcPath?: string | undefined): Promise<Map<string, {
+    auditTranslations(srcPath?: string): Promise<Map<string, {
         missing: string[];
         unused: string[];
     }>>;
@@ -108,11 +111,23 @@ export default class I18nDb {
      * @param {string} [opts.srcPath] - path to source directory (e.g. 'src/'), defaults to this.srcDir
      * @param {Set<string>} [opts.codeKeys] - translation keys
      * @param {string} [opts.useKeyAsDefault]
-     * @returns {Promise<Record<string,string>>}
+     * @returns {Promise<{ codeKeys: string[] }>}
      */
-    syncTranslations(targetUri?: string | undefined, opts?: {
+    syncTranslations(targetUri?: string, opts?: {
         srcPath?: string | undefined;
         codeKeys?: Set<string> | undefined;
         useKeyAsDefault?: string | undefined;
-    } | undefined): Promise<Record<string, string>>;
+    }): Promise<{
+        codeKeys: string[];
+    }>;
+    /**
+     * Sync translations for all locales at the root level.
+     *
+     * @param {Object} [opts] Options for syncTranslations.
+     * @returns {Promise<{ codeKeys: string[] }>}
+     */
+    syncTranslationsAll(opts?: any): Promise<{
+        codeKeys: string[];
+    }>;
 }
+export type TFunction = (arg0: string, arg1: Record<string, string | number> | undefined) => string;

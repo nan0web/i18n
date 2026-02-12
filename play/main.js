@@ -34,9 +34,12 @@ console.info()
 console.success('I18nDb example:')
 const db = new MemoryDB({
 	predefined: new Map([
-		['data/uk/_/t.json', { 'Welcome!': 'Ласкаво просимо!', 'Home': 'Дім' }],
-		['data/uk/apps/topup-tel/_/t.json', { 'Top-up Telephone': 'Поповнення телефону', 'Home': 'Головна' }]
-	])
+		['data/uk/_/t.json', { 'Welcome!': 'Ласкаво просимо!', Home: 'Дім' }],
+		[
+			'data/uk/apps/topup-tel/_/t.json',
+			{ 'Top-up Telephone': 'Поповнення телефону', Home: 'Головна' },
+		],
+	]),
 })
 await db.connect()
 const i18nDb = new I18nDb({
@@ -45,7 +48,7 @@ const i18nDb = new I18nDb({
 	tPath: '_/t.json',
 	dataDir: 'data',
 	srcDir: 'src',
-	langs: { 'uk': true, 'en': true }
+	langs: { uk: true, en: true },
 })
 t = await i18nDb.createT('apps/topup-tel')
 console.info(t('Top-up Telephone'))

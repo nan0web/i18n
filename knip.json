@@ -1,0 +1,20 @@
+{
+	"$schema": "https://unpkg.com/knip@5/schema.json",
+	"entry": [
+		"src/index.js",
+		"src/README.md.js",
+		"bin/i18n.js",
+		"bin/postinstall.js",
+		"play/main.js"
+	],
+	"project": ["src/**/*.js", "bin/**/*.js", "play/**/*.js", "types/**/*.d.ts"],
+	"ignore": ["**/*.test.js"],
+	"ignoreExportsUsedInFile": true,
+	"ignoreDependencies": [
+		"@nan0web/db",
+		"@nan0web/db-fs",
+		"@nan0web/event",
+		"@nan0web/log",
+		"@nan0web/test"
+	]
+}
