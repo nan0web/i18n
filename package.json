@@ -1,9 +1,12 @@
 {
 	"name": "@nan0web/i18n",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "A tiny, zero-dependency i18n helper for Java•Script",
 	"type": "module",
 	"main": "src/index.js",
+	"dependencies": {
+		"@nan0web/db-fs": "^1.0.0"
+	},
 	"types": "types/index.d.ts",
 	"bin": {
 		"i18n": "bin/i18n.js"
@@ -47,7 +50,6 @@
 	"packageManager": "pnpm@10.11.0",
 	"devDependencies": {
 		"@nan0web/db": "^1.0.2",
-		"@nan0web/db-fs": "^1.0.0",
 		"@nan0web/event": "^1.0.0",
 		"@nan0web/log": "^1.1.1",
 		"@nan0web/test": "^1.1.3",
