@@ -1,6 +1,6 @@
 {
 	"name": "@nan0web/i18n",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "A tiny, zero-dependency i18n helper for Java•Script",
 	"type": "module",
 	"main": "src/index.js",
@@ -11,7 +11,8 @@
 	"files": [
 		"src/**/*.js",
 		"!src/**/*.test.js",
-		"types/**/*.d.ts"
+		"types/**/*.d.ts",
+		"bin/**/*.js"
 	],
 	"scripts": {
 		"postinstall": "node bin/postinstall.js",
@@ -20,7 +21,7 @@
 		"build": "tsc",
 		"audit": "pnpm audit --audit-level=moderate",
 		"test": "node --test \"src/**/*.test.js\" | nan0test parse --fail",
-		"test:all": "pnpm test && pnpm run test:docs && pnpm build && pnpm run audit && pnpm run knip",
+		"test:all": "pnpm test && pnpm run test:docs && pnpm test:release && pnpm build && pnpm run audit && pnpm run knip",
 		"test:coverage": "node --experimental-test-coverage --test-coverage-include=\"src/**/*.js\" --test-coverage-exclude=\"src/**/*.test.js\" --test \"src/**/*.test.js\"",
 		"test:coverage:collect": "nan0test coverage",
 		"test:docs": "node --test src/README.md.js",
