@@ -5,10 +5,6 @@ import { readFileSync } from 'node:fs'
 const pkg = JSON.parse(readFileSync(new URL('../../../package.json', import.meta.url), 'utf-8'))
 
 describe('v1.0.4 — Fix dependencies', () => {
-	it('version is 1.0.4', () => {
-		assert.equal(pkg.version, '1.0.4')
-	})
-
 	it('@nan0web/db-fs is in dependencies', () => {
 		assert.ok(
 			pkg.dependencies && pkg.dependencies['@nan0web/db-fs'],

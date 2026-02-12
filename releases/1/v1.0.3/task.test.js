@@ -5,10 +5,6 @@ import { readFileSync } from 'node:fs'
 const pkg = JSON.parse(readFileSync(new URL('../../../package.json', import.meta.url), 'utf-8'))
 
 describe('v1.0.3 — Fix package publishing', () => {
-	it('version is 1.0.3', () => {
-		assert.equal(pkg.version, '1.0.3')
-	})
-
 	it('files array includes bin/**/*.js', () => {
 		assert.ok(pkg.files.includes('bin/**/*.js'), 'bin/**/*.js must be in files')
 	})
