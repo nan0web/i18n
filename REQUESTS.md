@@ -7,3 +7,7 @@
 
 2. **Add `--yaml` switch to `npx i18n sync`**  
    Implement a `--yaml` flag to synchronize translation keys directly into `_/t.yaml` instead of resolving them into `_/t.json`. `yaml` files are the main Developer Experience (DX) source of truth, so when sync runs, it should directly push missing strings to `data/{locale}/_/t.yaml`.
+
+3. **Dynamic Locale Options Generation**  
+   In Model-as-Schema configurations (e.g. `defaultLocale`), it is an anti-pattern to hardcode locales like `options: ['uk', 'en']`. However, `langs.json` is a map of objects containing full language info.  
+   **Task:** Add a utility or method in `I18nDb` (e.g., `getLangOptions()`) that dynamically parses `langs.json` and returns the standardized format `[{ value: 'uk', label: 'Українська' }]`. This standardizes language selection in CLI plugins and Web forms safely and dynamically without framework duplication.
