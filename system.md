@@ -518,3 +518,71 @@ flowchart LR
 > Закінчи створенням світу, де кожен може сказати 'так'."
 
 **@nan0web/i18n відповідає**
+
+---
+
+## 🌍 Стандарти локалізації, i18n, SPA маршрутизація, PWA та UX
+
+### 1. Фундаментальна Стратегія Перекладу
+
+- Маркери `t()` та ключі схеми є джерелами істини.
+- Багатомовні знімки (snapshots) повинні забезпечувати візуальний паритет між `uk`, `en`, etc.
+
+### 2. Роутинг "Спочатку Локаль" (Locale-First)
+
+- **Протокол**: Усі URL-адреси повинні відповідати паттерну `/<locale>/<path>`. За замовчуванням — `/uk/`.
+- **Паритет**: Усі додатки, компоненти та сайти є багатомовними за замовчуванням. Структурний паритет між локалями є обов'язковим.
+
+### 3. Унікальна Адресація
+
+- Кожен продукт або ключовий розділ повинен мати унікальну URL-адресу.
+- Використовуйте ID та хеші (`#item-id`) для націлювання на конкретні елементи на сторінці.
+
+### 4. Тексти тільки з моделей (Model-First i18n)
+
+- **Правило ZERO HARDCODE**: Всі написи UI визначаються виключно у моделях (`$Component` секція YAML) або завантажуються з БД (`db-fs`).
+- ❌ **СУВОРА ЗАБОРОНА**: Категорично заборонено використовувати тернарні оператори чи JS-умови для перекладу безпосередньо в компонентах (напр. `lang === 'uk' ? 'Так' : 'Yes'`). Це руйнує екосистему.
+- ✅ **РІШЕННЯ**: Компонент має бути "тупим" (Dumb Component). Він просто приймає `props.label` або `data.title`, а переклад відбувається на рівні провайдера даних або `t('key')` утиліти.
+- **Універсальна Архітектура Даних (Language-Agnostic Fetching)**:
+  - **Єдине Джерело (Single Origin)**: Переклади (`t`), конфігурація доступних мов (`langs`) та метадані каталогу завантажуються виключно через прямий стандартний запит (`fetch()`) до документа конкретної сторінки або компонента (наприклад, з його `_.json` копії).
+- **`@nan0web/i18n`** автоматично збирає ключі з моделей завдяки правилам `EXTRACT_FIELDS` (`help*`, `label*`, `error*`, тощо).
+
+### 5. Безшовний UX та PWA-Ready
+
+- **SPA Перемикання Локалі**: Зміна мови НЕ перезавантажує сторінку. Використовуйте `history.pushState` + модульну змінну `currentLocale` + подію `locale-change`.
+- Заборонено прив'язувати перемикання мови до жорстких перезавантажень (`window.location.reload()`), орієнтуйтеся на реактивні події.
+
+---
+
+## 🤖 Zero-Hallucination i18n Translation & Keys Validator Subagent
+
+Якщо ви використовуєте AI-асистентів або автоматизовані пайплайни (LLiMo/0HCnAI), використовуйте наступний системний промпт для валідації локалізації у компонентах:
+
+**INPUTS REQUIRED:**
+
+- `[LOCALE_KEYS]` (Known `_/t.yaml` dictionary or interface definitions)
+- `[TARGET_CONTENT]` (JSX, JS, logic file)
+
+**SYSTEM PROMPT (Agnostic AI API Persona):**
+You are an isolated, Agnostic Zero-Hallucination i18n Code Inspector. You do not converse. You output structural JSON.
+
+You must evaluate the snippet rigorously based on structural integrity and specific rules provided.
+There is no ambiguity: every user-facing UI text is either wrapped in a translation hook (`t()`) or it is a critical error.
+To mark something an error, provide the EXACT line and hardcoded string found.
+
+**OBJECTIVE:**
+Analyze the provided `[TARGET_CONTENT]` source.
+
+- Find any user-facing UI strings (titles, buttons, labels) that are hardcoded directly into JSX/JS instead of dynamic variables or `t()` functions.
+- Skip console logs or error messages meant for developers.
+- Validate that keys passed to `t()` MUST start with a Model identifier (e.g., `t(Model.label)`, `t(Model.error)`, `t(BranchModel.help_type)`). Any string literal like `t('Some Key')` is a critical error. **(Exception: simple UI components where string literal keys are permitted by architecture if they are extracted to `_.json`)**.
+
+**STRICT OUTPUT CONTRACT:**
+
+```json
+{
+  "score": 100,
+  "errors": ["Line 45: Hardcoded literal '<button>Submit</button>' violates i18n rule."]
+}
+```
+
