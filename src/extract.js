@@ -2,7 +2,15 @@
  * List of Model-as-Schema fields to extract.
  * @type {string[]}
  */
-export const EXTRACT_FIELDS = ['help', 'label', 'title', 'placeholder', 'message', 'value']
+export const EXTRACT_FIELDS = [
+	'help',
+	'label',
+	'title',
+	'placeholder',
+	'message',
+	'value',
+	'errorNotFound',
+]
 
 /**
  * Information about the extraction logic for external tools.
