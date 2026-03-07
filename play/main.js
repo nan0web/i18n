@@ -3,7 +3,8 @@
 import Logger from '@nan0web/log'
 import { MemoryDB } from '@nan0web/test'
 import I18nDb from '../src/I18nDb.js'
-import User from './models/User.js'
+import { Language } from '../src/domain/Language.js'
+import { p, errorMsg, highlight } from './components/cli/p.js'
 
 console = new Logger()
 
@@ -51,35 +52,25 @@ const i18nDb = new I18nDb({
 })
 
 const t = await i18nDb.createT('uk', '')
-console.success(
+highlight(
 	`🌍 Available Locales: ${i18nDb
 		.getLangOptions()
 		.map((l) => l.label)
 		.join(', ')}\n`,
 )
 
-console.info('Demonstrating translated Model-as-Schema properties (prepared for ui-lit or ui-cli):')
-console.success('\n--- User Form Extracted Metadata ---')
+p('Demonstrating translated Model-as-Schema properties (prepared for ui-lit or ui-cli):')
+highlight('\n--- Language Model Extracted Metadata ---')
 
-const { username, role } = User.properties
+const { title, locale, icon } = Language
 
-console.info(`Label:           ${t(username.label)}`)
-console.info(`Placeholder:     ${t(username.placeholder)}`)
-console.info(`Help:            ${t(username.help)}`)
+p(`Title Help:      ${t(title.help)}`)
+p(`Locale Help:     ${t(locale.help)}`)
+p(`Icon Help:       ${t(icon.help)}`)
 
-// Note how we dynamically extract anything starting with 'error'
-console.error(`Error Invalid:   ${t(username.errorInvalid)}`)
-console.error(`Error Not Found: ${t(username.errorNotFound)}`)
-console.error(`Error API:       ${t(username.error_api_failure)}`)
-
-console.info('\n--- Options for Dropdown (Role) ---')
-for (const opt of role.options) {
-	// We translate opt.label, but NOT opt.value.
-	// The variable 'opt.value' stays technical (e.g. 'admin'), while label translates.
-	console.info(`Value: '${opt.value}' -> Label: '${t(opt.label)}'`)
-}
+errorMsg(`Locale Error:    ${t(locale.errorNotFound)}`)
 
 console.warn('\n=== End of Playground ===\n')
-console.info(
+p(
 	'Check the `./play/` folder for visual UI-cli and Web Components (ui-lit) architectural examples.',
 )

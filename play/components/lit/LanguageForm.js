@@ -5,7 +5,7 @@
  */
 import { LitElement, html } from 'lit'
 
-export class UserForm extends LitElement {
+export class LanguageForm extends LitElement {
 	static properties = {
 		model: { type: Object },
 		t: { type: Function },
@@ -20,32 +20,28 @@ export class UserForm extends LitElement {
 		// Component simply uses the model metadata and passes it through the i18n t() function.
 		// The keys from 'label', 'placeholder', 'help', and 'error*' were already extracted
 		// during the build step.
-		const username = this.model.properties.username
-		const role = this.model.properties.role
+		const title = this.model.title
+		const locale = this.model.locale
+		const icon = this.model.icon
 
 		return html`
 			<form>
 				<div class="field">
-					<label>${this.t(username.label)}</label>
-					<input type="text" placeholder=${this.t(username.placeholder)} />
-					<small class="help">${this.t(username.help)}</small>
-
-					<!-- Example showing an error message -->
-					<!-- We extract ANY property starting with 'error' -->
-					<span class="error">${this.t(username.errorInvalid)}</span>
-					<span class="error">${this.t(username.errorNotFound)}</span>
+					<label>${this.t(title.help)}</label>
+					<input type="text" placeholder=${this.t(title.default)} />
 				</div>
 
 				<div class="field">
-					<label>${this.t(role.label)}</label>
-					<select>
-						${role.options.map(
-							(opt) => html`
-								<!-- We translate label, but NOT value, because 'value' inside options array is ignored by our extractor -->
-								<option value=${opt.value}>${this.t(opt.label)}</option>
-							`,
-						)}
-					</select>
+					<label>${this.t(locale.help)}</label>
+					<input type="text" placeholder=${this.t(locale.default)} />
+					<!-- Example showing an error message -->
+					<!-- We extract ANY property starting with 'error' -->
+					<span class="error">${this.t(locale.errorNotFound)}</span>
+				</div>
+
+				<div class="field">
+					<label>${this.t(icon.help)}</label>
+					<input type="text" placeholder=${this.t(icon.default)} />
 				</div>
 			</form>
 		`

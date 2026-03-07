@@ -146,7 +146,7 @@ export default class I18nDb {
 	 * @param {string} uri
 	 * @returns {Promise<TFunction>}
 	 */
-	async createT(locale, uri = '') {
+	async createT(locale = this.locale, uri = '') {
 		if (this._tFunctions.has(uri)) return this._tFunctions.get(uri)
 
 		const url = this.db.resolveSync(locale, uri)
