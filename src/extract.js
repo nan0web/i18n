@@ -3,13 +3,13 @@
  * @type {string[]}
  */
 export const EXTRACT_FIELDS = [
-	'help',
-	'label',
-	'title',
-	'placeholder',
-	'message',
-	'value',
-	'errorNotFound',
+	'help*',
+	'label*',
+	'title*',
+	'placeholder*',
+	'message*',
+	'value*',
+	'error*',
 ]
 
 /**
@@ -35,9 +35,10 @@ export const extractInfo = {
  * @returns {string[]} Sorted array of unique keys.
  */
 export function extract(content) {
+	const fields = EXTRACT_FIELDS.map((s) => s.replace('*', '[a-zA-Z0-9_]*')).join('|')
 	const regexes = [
 		/\bt\(['"`](.*?)['"`]\)/g,
-		new RegExp(`\\b(?:${EXTRACT_FIELDS.join('|')}):\\s*['"\`](.*?)['"\`]`, 'g'),
+		new RegExp(`\\b(?:${fields}):\\s*['"\`](.*?)['"\`]`, 'g'),
 		/\/\/\s*t\(['"`](.*?)['"`]\)/g,
 	]
 
@@ -86,7 +87,7 @@ export function extract(content) {
 			const key = match[1]
 			if (rIndex === 1) {
 				const fullMatch = match[0]
-				if (fullMatch.startsWith('value:')) {
+				if (fullMatch.startsWith('value')) {
 					const matchStart = match.index
 					const inOptions = optionsRanges.some(
 						([start, end]) => matchStart >= start && matchStart <= end,

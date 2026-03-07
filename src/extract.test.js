@@ -85,4 +85,49 @@ describe('extract()', () => {
 		console.assert(!keys.includes('inactive'))
 		console.assert(!keys.includes('[some_val]'))
 	})
+
+	it('should extract any property starting with error', () => {
+		const content = `
+		static properties = {
+			field: {
+				errorNotFound: "Not found",
+				errorInvalid: "Invalid value",
+				errorICannotUnderstandWhyYouCannotUnderstandMe: "Wat",
+				error_custom: "Custom error",
+				error: "General error"
+			}
+		}`
+		const keys = extract(content)
+		console.assert(keys.includes('Not found'))
+		console.assert(keys.includes('Invalid value'))
+		console.assert(keys.includes('Wat'))
+		console.assert(keys.includes('Custom error'))
+		console.assert(keys.includes('General error'))
+	it('should extract any dynamic field starting with specified prefixes', () => {
+		const content = `
+		static properties = {
+			field: {
+				label_main: "Main Label",
+				title_hover: "Hover Title",
+				help_inline: "Inline Help",
+				placeholder_search: "Search...",
+				message_empty: "List is empty",
+				error_api: "API failed",
+				value_initial: "Initial Value",
+				options: [
+					{ label_short: "Short", value_inner: "inner" }
+				]
+			}
+		}`
+		const keys = extract(content)
+		console.assert(keys.includes('Main Label'))
+		console.assert(keys.includes('Hover Title'))
+		console.assert(keys.includes('Inline Help'))
+		console.assert(keys.includes('Search...'))
+		console.assert(keys.includes('List is empty'))
+		console.assert(keys.includes('API failed'))
+		console.assert(keys.includes('Initial Value'))
+		console.assert(keys.includes('Short'))
+		console.assert(!keys.includes('inner'))
+	})
 })
