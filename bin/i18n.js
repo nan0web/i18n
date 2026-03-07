@@ -2,6 +2,7 @@
 
 import audit from './audit.js'
 import sync from './sync.js'
+import info from './info.js'
 import generate from './generate.js'
 import { completionScript, zshCompletionScript } from './completion.js'
 
@@ -29,6 +30,9 @@ switch (command) {
 	case 'audit':
 		await audit()
 		break
+	case 'info':
+		await info()
+		break
 	case 'sync':
 		await sync(parseArgs())
 		break
@@ -47,6 +51,7 @@ switch (command) {
 		console.error('Usage: i18n <audit|sync|generate|completion>')
 		console.error('')
 		console.error('Commands:')
+		console.error('  info               Show current extraction logic and fields')
 		console.error('  audit              Audit i18n keys')
 		console.error('  sync               Sync translations')
 		console.error('    --yaml           Sync into _/t.yaml instead of _/t.json')

@@ -1,4 +1,22 @@
 /**
+ * List of Model-as-Schema fields to extract.
+ * @type {string[]}
+ */
+export const EXTRACT_FIELDS = ['help', 'label', 'title', 'placeholder', 'message', 'value']
+
+/**
+ * Information about the extraction logic for external tools.
+ */
+export const extractInfo = {
+	fields: EXTRACT_FIELDS,
+	functions: ['t'],
+	comments: ['// t("key")'],
+	ignore: {
+		value: ['inside options: [...] arrays'],
+	},
+}
+
+/**
  * Extracts translation keys from source code.
  * Supports:
  * - t('key') calls
@@ -11,7 +29,7 @@
 export function extract(content) {
 	const regexes = [
 		/\bt\(['"`](.*?)['"`]\)/g,
-		/\b(?:help|label|title|placeholder|message|value):\s*['"`](.*?)['"`]/g,
+		new RegExp(`\\b(?:${EXTRACT_FIELDS.join('|')}):\\s*['"\`](.*?)['"\`]`, 'g'),
 		/\/\/\s*t\(['"`](.*?)['"`]\)/g,
 	]
 
