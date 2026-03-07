@@ -66,7 +66,28 @@ export default class I18nDb {
 	 * @returns {string[]}
 	 */
 	get locales() {
+		if (Array.isArray(this.langs)) {
+			return this.langs.map((l) => l.value)
+		}
 		return Object.keys(this.langs)
+	}
+
+	/**
+	 * Returns available locales as array of options: { value, label }
+	 * @returns {Array<{value: string, label: string}>}
+	 */
+	getLangOptions() {
+		if (Array.isArray(this.langs)) {
+			return this.langs.map((l) => ({
+				value: l.value,
+				label: l.label || l.value,
+			}))
+		}
+		// Fallback for object format { uk: { label: 'Українська' } } or { uk: 'Українська' }
+		return Object.entries(this.langs).map(([value, data]) => ({
+			value,
+			label: (data && typeof data === 'object' ? data.label : data) || value,
+		}))
 	}
 
 	/**

@@ -5,3 +5,6 @@
 /chat/
 /llm/
 /me.md
+
+# Private agent under LICENSE
+.agent/

@@ -315,7 +315,7 @@ function testRender() {
 		assert.equal(pkg.scripts?.prepush, 'npm test')
 		assert.equal(pkg.scripts?.prepare, 'husky')
 		const text = await fs.loadDocument(path.join(__dirname, '../CONTRIBUTING.md'))
-		const str = String(text)
+		const str = String(text.content || text)
 		assert.ok(str.includes('# Contributing'))
 	})
 
@@ -355,7 +355,7 @@ function testRender() {
 	it('How to license? - [ISC LICENSE](./LICENSE) file.', async () => {
 		/** @docs */
 		const text = await fs.loadDocument(path.join(__dirname, '../LICENSE'))
-		assert.ok(String(text).includes('ISC'))
+		assert.ok(String(text.content || text).includes('ISC'))
 	})
 }
 
@@ -374,7 +374,7 @@ describe('Rendering README.md', async () => {
 	await fs.saveDocument(path.join(__dirname, '../.datasets/README.dataset.jsonl'), dataset)
 
 	it(`document is rendered in README.md [${format(Buffer.byteLength(text))}b]`, async () => {
-		const text = await fs.loadDocument('README.md')
-		assert.ok(text.includes('## License'))
+		const doc = await fs.loadDocument('README.md')
+		assert.ok(String(doc.content || doc).includes('## License'))
 	})
 })

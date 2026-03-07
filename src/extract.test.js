@@ -54,4 +54,35 @@ describe('extract()', () => {
 		console.assert(keys.includes('Say "hello"'))
 		console.assert(keys.includes('Backtick "` and \'` quotes'))
 	})
+
+	it('should ignore value inside options arrays but extract it elsewhere', () => {
+		const content = `
+		static properties = {
+			status: {
+				label: 'Status',
+				value: 'Some static value',
+				options: [
+					{ label: 'Active', value: 'active' },
+					{ label: 'Inactive', value: 'inactive' }
+				]
+			},
+			another: {
+				value: 'This value should be extracted',
+				options: [
+					{ label: '[Nested Array test]', value: '[some_val]' }
+				]
+			}
+		}
+		`
+		const keys = extract(content)
+		console.assert(keys.includes('Status'))
+		console.assert(keys.includes('Some static value'))
+		console.assert(keys.includes('This value should be extracted'))
+		console.assert(keys.includes('Active'))
+		console.assert(keys.includes('Inactive'))
+		console.assert(keys.includes('[Nested Array test]'))
+		console.assert(!keys.includes('active'))
+		console.assert(!keys.includes('inactive'))
+		console.assert(!keys.includes('[some_val]'))
+	})
 })

@@ -11,8 +11,15 @@ function parseArgs() {
 	const args = {}
 	for (let i = 3; i < process.argv.length; i++) {
 		const arg = process.argv[i]
-		if (arg.startsWith('--') && process.argv[i + 1]) {
-			args[arg.slice(2)] = process.argv[++i]
+		if (arg.startsWith('--')) {
+			const key = arg.slice(2)
+			const next = process.argv[i + 1]
+			if (next && !next.startsWith('--')) {
+				args[key] = next
+				i++
+			} else {
+				args[key] = true
+			}
 		}
 	}
 	return args
@@ -23,7 +30,7 @@ switch (command) {
 		await audit()
 		break
 	case 'sync':
-		await sync()
+		await sync(parseArgs())
 		break
 	case 'generate':
 		await generate(parseArgs())
@@ -42,6 +49,7 @@ switch (command) {
 		console.error('Commands:')
 		console.error('  audit              Audit i18n keys')
 		console.error('  sync               Sync translations')
+		console.error('    --yaml           Sync into _/t.yaml instead of _/t.json')
 		console.error('  generate           Generate JS cache from YAML')
 		console.error('    --data <dir>     Data directory (default: ./data)')
 		console.error('    --out <dir>      Output directory (default: ./src/i18n)')

@@ -52,6 +52,14 @@ export default class I18nDb {
      */
     get locales(): string[];
     /**
+     * Returns available locales as array of options: { value, label }
+     * @returns {Array<{value: string, label: string}>}
+     */
+    getLangOptions(): Array<{
+        value: string;
+        label: string;
+    }>;
+    /**
      * Get the data path with trailing slash
      * @returns {string}
      */
