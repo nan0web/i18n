@@ -9,8 +9,9 @@ import { p, errorMsg, highlight } from './components/cli/p.js'
 /**
  * All playground UI messages — Model-as-Schema pattern.
  * Zero hardcoded strings in adapters.
+ * MUST be exported so `npx i18n sync` can discover keys.
  */
-class PlaygroundMessages {
+export class PlaygroundMessages {
 	static banner = {
 		help: '=== @nan0web/i18n CLI Playground ===',
 	}

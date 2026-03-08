@@ -30,6 +30,9 @@
 
 - **В моделі**: `static field = { help: "Unique user name" }` (це ключ)
 - **В UI/Адаптері**: `t(Model.field.help)` (тут відбувається пробудження слова)
+- **ЗАБОРОНЕНО**: `t('Unique user name')` — рядковий літерал у `t()` є архітектурним порушенням
+
+> **Обов'язковий Експорт**: Кожна модель з полями перекладу (`help*`, `label*`, `error*`, `placeholder*`, `title*`, `message*`) **ОБОВ'ЯЗКОВО** має бути `export class`. Без `export` команда `npx i18n sync` не зможе зібрати ключі.
 
 ### 3. Каскадний Фалбек (Cascading Fallback)
 
