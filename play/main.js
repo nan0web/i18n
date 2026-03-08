@@ -17,17 +17,11 @@ const db = new MemoryDB({
 		[
 			'data/uk/_/t.json',
 			{
-				Username: "Ім'я користувача",
-				'Enter your username': "Введіть ім'я",
-				'User is not found in the system': 'Користувач не знайдений у системі',
-				'Username must be at least 3 characters': "Ім'я має містити щонайменше 3 символи",
-				'Internal server error while verifying': 'Внутрішня помилка при перевірці',
-				'Please provide a unique username': "Будь ласка, вкажіть унікальне ім'я",
-				Role: 'Роль',
-				Admin: 'Адміністратор',
-				Guest: 'Гість',
-				'Please fill out the user registration form.': 'Будь ласка, заповніть форму реєстрації.',
-				'Registration complete!': 'Реєстрацію завершено!',
+				'Language title': 'Назва мови',
+				Locale: 'Локаль',
+				'Locale not found': 'Локаль не знайдено',
+				'Invalid locale format': 'Невірний формат локалі',
+				'Language icon': 'Іконка мови',
 			},
 		],
 		[

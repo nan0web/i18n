@@ -3,7 +3,7 @@ import extract from './extract.js'
 import event from '@nan0web/event'
 
 /**
- * @typedef {function(string, Record<string, string|number>=): string} TFunction
+ * @typedef {function(string, Record<string, string|number>): string} TFunction
  */
 
 /**

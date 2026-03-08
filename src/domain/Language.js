@@ -10,8 +10,10 @@ export class Language {
 	static locale = {
 		help: 'Locale',
 		errorNotFound: 'Locale not found',
+		errorInvalidFormat: 'Invalid locale format',
 		/** @type {Locale} */
 		default: 'en_GB',
+		validate: (str) => /^[a-z]{2}(_[A-Z]{2})?$/.test(str) || Language.locale.errorInvalidFormat,
 	}
 	static icon = {
 		help: 'Language icon',
@@ -27,9 +29,6 @@ export class Language {
 
 	/** @param {Partial<Language>} [data] */
 	constructor(data = {}) {
-		if (data.locale && !/^[a-z]{2}(_[A-Z]{2})?$/.test(data.locale)) {
-			throw new Error(`Invalid locale format: ${data.locale}`)
-		}
 		data = resolveAliases(Language, data)
 		Object.assign(this, resolveDefaults(Language, data))
 	}

@@ -102,58 +102,69 @@
 
 `createT` створює функцію для перекладу, яка:
 
-- шукає ключ у словнику
+- отримує ключ з Моделі (`Model.field.help`)
+- шукає його у словнику
 - замінює змінні у вигляді `{name}`
 - повертає оригінальний ключ, якщо перекладу немає
 
 #### ✅ Призначення
 
-Дозволяє легко перекладати текст у програмі, не залежно від того, де зберігаються переклади.
+Дозволяє легко перекладати текст у програмі. **Ключі ЗАВЖДИ беруться з Моделей**, ніколи не з рядкових літералів.
 
 #### 🔧 Як використовувати?
 
 ```js
+import { Language } from './src/domain/Language.js'
 import { createT } from '@nan0web/i18n'
 
-// Створюємо функцію перекладу з українським словником
+// Словник, згенерований командою `npx i18n sync`
 const uk = {
-  'Welcome!': 'Ласкаво просимо!',
-  'Hello {name}': 'Привіт, {name}!',
+  'Language title': 'Назва мови',
+  Locale: 'Локаль',
+  'Language icon': 'Іконка мови',
+  'Locale not found': 'Локаль не знайдено',
 }
 const t = createT(uk)
 
-console.log(t('Welcome!')) // → "Ласкаво просимо!"
-console.log(t('Hello {name}', { name: 'Анна' })) // → "Привіт, Анна!"
+// ✅ ПРАВИЛЬНО: ключі з Моделей
+console.info(t(Language.title.help)) // → "Назва мови"
+console.info(t(Language.locale.help)) // → "Локаль"
+console.info(t(Language.locale.errorNotFound)) // → "Локаль не знайдено"
+
+// ❌ ЗАБОРОНЕНО: рядкові літерали
+// console.info(t('Language title')) — НІКОЛИ!
 ```
 
-#### 🧪 Приклад з реального коду
+#### 🧪 Приклад з реального коду (I18nDb)
 
 ```yaml
-# data/uk/_/t.yaml
-Pick a color: Оберіть колір
-Selected color: {color}: Обраний колір: {color}
+# data/uk/_/t.yaml — згенерований `npx i18n sync`
+Language title: Назва мови
+Locale: Локаль
+Locale not found: Локаль не знайдено
+Invalid locale format: Невірний формат локалі
+Language icon: Іконка мови
 ```
 
 ```js
-// src/ui/cli.js
-import { createT, I18nDb } from '@nan0web/i18n'
+import I18nDb from '@nan0web/i18n'
 import DBFS from '@nan0web/db-fs'
-import models from './src/domain/index.js'
+import { Language } from './src/domain/Language.js'
 
 const db = new DBFS({ root: 'data' })
 await db.connect()
 
-const i18n = new I18nDb({ db, models })
-await i18n.connect()
+const i18n = new I18nDb({ db })
+const t = await i18n.createT('uk')
 
-const t = i18n.createT('uk')
-
-console.info(t('Pick a color'))
-console.info(t('Selected color: {color}', { color: 'синій' }))
+// ✅ Всі ключі — з Моделей
+console.info(t(Language.title.help)) // → "Назва мови"
+console.info(t(Language.locale.errorNotFound)) // → "Локаль не знайдено"
+console.info(t(Language.locale.errorInvalidFormat)) // → "Невірний формат локалі"
 ```
 
 - Ключі у словнику потрапляють туди **ТІЛЬКИ з Моделей** (`static field = {}`). Вони є єдиним джерелом істини.
-- Жодних унікальних ідентифікаторів чи ручного хардкоду в адаптерах.
+- Жодних рядкових літералів чи ручного хардкоду в адаптерах.
 
 #### 🧪 Валідація
 
@@ -161,7 +172,7 @@ console.info(t('Selected color: {color}', { color: 'синій' }))
 - Покриття: 100%
 - Перевірка: що рядки зі змінними `{name}` правильно замінюються
 
-> **nan0coder перевіряє**: чи переклад зберігає **намір оригіналу**, а не лише зміст?
+> **nan0coder перевіряє**: чи використовуються виключно посилання на Моделі, а не рядкові літерали?
 
 ---
 
@@ -191,16 +202,16 @@ console.info(t('Selected color: {color}', { color: 'синій' }))
 ```js
 import I18nDb from '@nan0web/i18n'
 import { DB } from '@nan0web/db'
+import { Language } from './src/domain/Language.js'
 
-// Створюємо базу даних (приклад з попередньо визначеними даними)
 const db = new DB({
   predefined: new Map([
-    ['data/uk/_/t.json', { 'Welcome!': 'Ласкаво просимо!' }],
     [
-      'data/uk/apps/topup-tel/_/t.json',
+      'data/uk/_/t.json',
       {
-        'Top-up Telephone': 'Поповнення телефону',
-        Home: 'Головна',
+        'Language title': 'Назва мови',
+        Locale: 'Локаль',
+        'Locale not found': 'Локаль не знайдено',
       },
     ],
   ]),
@@ -208,15 +219,13 @@ const db = new DB({
 
 await db.connect()
 
-// Створюємо менеджер локалізації
 const i18nDb = new I18nDb({ db, locale: 'uk' })
+const t = await i18nDb.createT('uk')
 
-// Отримуємо функцію перекладу для певного контексту
-const t = await i18nDb.createT('apps/topup-tel')
-
-console.info(t('Top-up Telephone')) // → "Поповнення телефону"
-console.info(t('Welcome!')) // → "Ласкаво просимо!" (спадкування)
-console.info(t('Home')) // → "Головна"
+// ✅ Всі виклики t() — через Модельні посилання
+console.info(t(Language.title.help)) // → "Назва мови"
+console.info(t(Language.locale.help)) // → "Локаль"
+console.info(t(Language.locale.errorNotFound)) // → "Локаль не знайдено"
 ```
 
 #### 🔄 Спадкування перекладів
@@ -247,7 +256,8 @@ console.info(t('Home')) // → "Головна"
 
 #### ✅ Призначення
 
-- Шукає виклики `t("...")` у коді
+- Шукає значення полів `help*`, `label*`, `placeholder*`, `title*`, `message*`, `error*`, `value*` у Моделях
+- Шукає виклики `t("...")` у коді (для зворотної сумісності)
 - Повертає набір унікальних ключів для перекладу
 - Використовується для **аудиту і синхронізації перекладів**
 
