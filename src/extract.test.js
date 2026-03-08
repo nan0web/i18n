@@ -1,5 +1,6 @@
 import { describe, it } from 'node:test'
-import extract from './extract.js'
+import extract, { extractFromModels } from './extract.js'
+import { Language } from './domain/Language.js'
 
 describe('extract()', () => {
 	it('should extract keys from t("...") calls', () => {
@@ -129,5 +130,76 @@ describe('extract()', () => {
 		console.assert(keys.includes('Initial Value'))
 		console.assert(keys.includes('Short'))
 		console.assert(!keys.includes('inner'))
+	})
+})
+
+describe('extractFromModels()', () => {
+	it('should extract keys from a real Language model', () => {
+		const keys = extractFromModels({ Language })
+		console.assert(keys.includes('Language title'), 'should include Language title')
+		console.assert(keys.includes('Locale'), 'should include Locale')
+		console.assert(keys.includes('Locale not found'), 'should include Locale not found')
+		console.assert(keys.includes('Invalid locale format'), 'should include Invalid locale format')
+		console.assert(keys.includes('Language icon'), 'should include Language icon')
+		console.assert(keys.length === 5, `expected 5 keys, got ${keys.length}: ${keys}`)
+	})
+
+	it('should extract keys from an array of models', () => {
+		const keys = extractFromModels([Language])
+		console.assert(keys.includes('Language title'))
+		console.assert(keys.length === 5)
+	})
+
+	it('should skip non-translatable fields (default, validate, options values)', () => {
+		class TestModel {
+			static field = {
+				help: 'Help text',
+				default: 'should_not_be_extracted',
+				validate: () => true,
+			}
+		}
+		const keys = extractFromModels({ TestModel })
+		console.assert(keys.includes('Help text'))
+		console.assert(!keys.includes('should_not_be_extracted'))
+		console.assert(keys.length === 1)
+	})
+
+	it('should extract label from options but skip value', () => {
+		class DropdownModel {
+			static role = {
+				label: 'Role',
+				options: [
+					{ label: 'Admin', value: 'admin' },
+					{ label: 'Guest', value: 'guest' },
+				],
+			}
+		}
+		const keys = extractFromModels({ DropdownModel })
+		console.assert(keys.includes('Role'))
+		console.assert(keys.includes('Admin'))
+		console.assert(keys.includes('Guest'))
+		console.assert(!keys.includes('admin'), 'should not include value "admin"')
+		console.assert(!keys.includes('guest'), 'should not include value "guest"')
+	})
+
+	it('should handle empty or invalid input gracefully', () => {
+		console.assert(extractFromModels({}).length === 0)
+		console.assert(extractFromModels([]).length === 0)
+		console.assert(extractFromModels({ x: null }).length === 0)
+		console.assert(extractFromModels({ y: 42 }).length === 0)
+	})
+
+	it('should extract from multiple models', () => {
+		class A {
+			static f1 = { help: 'Help A' }
+		}
+		class B {
+			static f2 = { label: 'Label B', errorX: 'Error B' }
+		}
+		const keys = extractFromModels({ A, B })
+		console.assert(keys.includes('Help A'))
+		console.assert(keys.includes('Label B'))
+		console.assert(keys.includes('Error B'))
+		console.assert(keys.length === 3)
 	})
 })

@@ -102,4 +102,67 @@ export function extract(content) {
 	return [...keys].sort()
 }
 
+/**
+ * Extracts translation keys directly from Model-as-Schema classes.
+ * This is the **primary** extraction method.
+ *
+ * Models must be exported classes with static properties containing
+ * fields like `help`, `label*`, `error*`, `placeholder*`, `title*`, `message*`, `value*`.
+ *
+ * @param {Record<string, Function>|Function[]} models - Object or array of Model classes.
+ * @returns {string[]} Sorted array of unique keys.
+ *
+ * @example
+ * import { Language } from './domain/Language.js'
+ * import { extractFromModels } from '@nan0web/i18n'
+ *
+ * const keys = extractFromModels({ Language })
+ * // → ['Invalid locale format', 'Language icon', 'Language title', 'Locale', 'Locale not found']
+ */
+export function extractFromModels(models) {
+	const fieldPatterns = EXTRACT_FIELDS.map((s) => {
+		const base = s.replace('*', '')
+		return base
+	})
+
+	const keys = new Set()
+	const classList = Array.isArray(models) ? models : Object.values(models)
+
+	for (const Model of classList) {
+		if (!Model || typeof Model !== 'function') continue
+
+		for (const [, meta] of Object.entries(Model)) {
+			if (!meta || typeof meta !== 'object') continue
+
+			for (const [fieldName, fieldValue] of Object.entries(meta)) {
+				if (typeof fieldValue !== 'string') continue
+
+				const matches = fieldPatterns.some((prefix) => fieldName.startsWith(prefix))
+				if (!matches) continue
+
+				// Skip 'value' inside options arrays (same rule as extract())
+				// Not needed here because we're iterating static properties, not options arrays.
+				keys.add(fieldValue)
+			}
+
+			// Also check nested options for label* fields (but skip value* inside options)
+			if (Array.isArray(meta.options)) {
+				for (const opt of meta.options) {
+					if (!opt || typeof opt !== 'object') continue
+					for (const [optKey, optVal] of Object.entries(opt)) {
+						if (typeof optVal !== 'string') continue
+						const matches = fieldPatterns.some((prefix) => optKey.startsWith(prefix))
+						// Ignore value* inside options (consistent with extract())
+						if (matches && !optKey.startsWith('value')) {
+							keys.add(optVal)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return [...keys].sort()
+}
+
 export default extract
