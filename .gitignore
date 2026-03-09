@@ -1,6 +1,7 @@
 /coverage/
 /node_modules/
 /.datasets/
+/reports/
 # Chat
 /chat/
 /llm/

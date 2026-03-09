@@ -87,3 +87,21 @@ extractFromModels({ LoginModel })
 Ця функція реалізує правило **4.1 Model Export Rule** з `.agent/workflows/i18n-standards.md`:
 
 > Кожна модель, яка містить статичні поля з метаданими, ПОВИННА бути експортована, щоб `@nan0web/i18n` міг обійти їхні статичні поля та зібрати ключі для словника перекладів.
+
+## 2. Nightly Audit
+
+```bash
+% sh ./bin/nightly-audit.sh --threads=3
+
+--- Welcome to the Nightly Audit! ---
+Select workflows to run:
+Selected: [i18n-inspector, snapshot-auditor, test-style-scanner]
+
+Loading source code...
+Loaded 631 files from 33 packages.
+
+1: db-fs/ [i18n-inspector] A few words from the response stream to see progress
+2: db-browser/ [snapshot-auditor] A few words from the response stream to see progress
+3: auth-browser/ [snapshot-auditor] A few words from the response stream to see progress
+02:12 [==----] 36% 12 completed, 1 failed, 21 left
+```

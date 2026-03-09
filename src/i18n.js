@@ -9,16 +9,8 @@ export const defaultVocab = {
 		'This way it is no need to create default (English) version vocab',
 }
 
-import { TFunction } from '@nan0web/types'
-
-/**
- * Creates a translation function bound to a specific vocabulary.
- *
- * @param {Object<string, string> | Map<string, string>} vocab
- * @param {string} [locale='en']
- * @returns {function(string, Record<string, any>=): string}
- */
-export { TFunction, TFunction as createT }
+/** @typedef {import('@nan0web/types').TFunction} TFunction */
+export { createT } from '@nan0web/types'
 
 /**
  * Selects appropriate vocabulary dictionary by locale.

@@ -1,5 +1,5 @@
 /**
- * @typedef {function(string, Record<string, string|number>=): string} TFunction
+ * @typedef {import("@nan0web/types").TFunction} TFunction
  */
 /**
  * I18nDb — i18n manager that uses DB for loading vocabs
@@ -18,6 +18,7 @@ export default class I18nDb {
      * @param {string} [input.srcDir="src"]
      * @param {string} [input.useKeyAsDefault=false]
      * @param {Record<string, Record<string, string>>} [input.langs={}]
+     * @param {Record<string, Function>|Function[]} [input.models={}] - Model-as-Schema classes for key extraction
      */
     constructor(input: {
         db: import("@nan0web/db").default;
@@ -29,6 +30,7 @@ export default class I18nDb {
         srcDir?: string | undefined;
         useKeyAsDefault?: string | undefined;
         langs?: Record<string, Record<string, string>> | undefined;
+        models?: Record<string, Function> | Function[] | undefined;
     });
     db: import("@nan0web/db").default;
     locale: string;
@@ -37,6 +39,7 @@ export default class I18nDb {
     dataDir: string;
     srcDir: string;
     langs: Record<string, Record<string, string>>;
+    models: Record<string, Function> | Function[];
     useKeyAsDefault: boolean;
     _cache: Map<any, any>;
     _tFunctions: Map<any, any>;
@@ -81,7 +84,7 @@ export default class I18nDb {
      * @param {string} uri
      * @returns {Promise<TFunction>}
      */
-    createT(locale: string, uri?: string): Promise<TFunction>;
+    createT(locale?: string, uri?: string): Promise<TFunction>;
     /**
      * Change current locale and emit 'i18nchange'
      * @param {string} locale
@@ -98,12 +101,48 @@ export default class I18nDb {
      */
     switchTo(locale: string, uri?: string): Promise<Function>;
     /**
+     * Extract translation keys directly from Model-as-Schema classes.
+     * This is the **primary** extraction method.
+     *
+     * @param {Record<string, Function>|Function[]} [models] - defaults to this.models
+     * @returns {Set<string>}
+     */
+    extractKeysFromModels(models?: Record<string, Function> | Function[]): Set<string>;
+    /**
+     * Audit translations by comparing Model keys with those in DB.
+     * Uses Models as the single source of truth.
+     *
+     * @param {Record<string, Function>|Function[]} [models] - defaults to this.models
+     * @returns {Promise<Map<string, {missing: string[], unused: string[]}>>}
+     */
+    auditModels(models?: Record<string, Function> | Function[]): Promise<Map<string, {
+        missing: string[];
+        unused: string[];
+    }>>;
+    /**
+     * Sync translations for all locales using Model keys as source of truth.
+     *
+     * @param {string} [targetUri] - target path for saving t.json
+     * @param {Object} [opts]
+     * @param {Record<string, Function>|Function[]} [opts.models] - defaults to this.models
+     * @param {boolean} [opts.useKeyAsDefault]
+     * @returns {Promise<{ codeKeys: string[] }>}
+     */
+    syncModels(targetUri?: string, opts?: {
+        models?: Record<string, Function> | Function[] | undefined;
+        useKeyAsDefault?: boolean | undefined;
+    }): Promise<{
+        codeKeys: string[];
+    }>;
+    /**
+     * @deprecated Use `extractKeysFromModels(models)` instead.
      * Extract all translation keys from source files using fs.findStream()
      * @param {string} srcPath - path to source directory (e.g. 'src/')
      * @returns {Promise<Set<string>>}
      */
     extractKeysFromCode(srcPath: string): Promise<Set<string>>;
     /**
+     * @deprecated Use `auditModels(models)` instead.
      * Audit translations by comparing keys in code with those in DB
      * @param {string} [srcPath] - path to source directory (e.g. 'src/'), defaults to this.srcDir
      * @returns {Promise<Map<string, {missing: string[], unused: string[]}>>}
@@ -113,6 +152,7 @@ export default class I18nDb {
         unused: string[];
     }>>;
     /**
+     * @deprecated Use `syncModels(targetUri, opts)` instead.
      * Sync translations for all locales by adding new keys from code as empty string values
      * @param {string} [targetUri] - target path for saving t.json (e.g. 'apps/topup-tel')
      * @param {Object} [opts] { useKeyAsDefault, srcPath }
@@ -129,6 +169,7 @@ export default class I18nDb {
         codeKeys: string[];
     }>;
     /**
+     * @deprecated Use `syncModels('', opts)` instead.
      * Sync translations for all locales at the root level.
      *
      * @param {Object} [opts] Options for syncTranslations.
@@ -138,4 +179,4 @@ export default class I18nDb {
         codeKeys: string[];
     }>;
 }
-export type TFunction = (arg0: string, arg1: Record<string, string | number> | undefined) => string;
+export type TFunction = import("@nan0web/types").TFunction;

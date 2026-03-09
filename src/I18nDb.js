@@ -1,9 +1,9 @@
-import { createT } from './i18n.js'
+import { createT } from '@nan0web/types'
 import extract, { extractFromModels } from './extract.js'
 import event from '@nan0web/event'
 
 /**
- * @typedef {import("@nan0web/types").TFunctionFunc} TFunction
+ * @typedef {import("@nan0web/types").TFunction} TFunction
  */
 
 /**

@@ -1,23 +1,22 @@
 import { describe, it, before, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
+
 import DB from '@nan0web/db'
 import FS from '@nan0web/db-fs'
 import { NoConsole } from '@nan0web/log'
 import { DocsParser, runSpawn, DatasetParser } from '@nan0web/test'
+
 import { createT, extract, extractFromModels, i18n, I18nDb } from './index.js'
 import { Language } from './domain/Language.js'
 
-import { fileURLToPath } from 'node:url'
-import path from 'node:path'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const fs = new FS()
+const i18nBin = fs.resolveSync('bin/i18n.js')
+
 let pkg
 
-// Load package.json once before tests
+// Load package.json once before tests via db-fs
 before(async () => {
-	const doc = await fs.loadDocument(path.join(__dirname, '../package.json'), {})
-	pkg = doc || {}
+	pkg = (await fs.loadDocument('package.json')) || {}
 })
 
 let console = new NoConsole()
@@ -28,20 +27,12 @@ beforeEach(() => {
 
 async function testCompletion() {
 	it('shell completion logic works', async () => {
-		const response = await runSpawn('node', [
-			path.join(__dirname, '../bin/i18n.js'),
-			'completion',
-			'zsh',
-		])
+		const response = await runSpawn('node', [i18nBin, 'completion', 'zsh'])
 		assert.ok(response.code === 0, 'i18n completion zsh should exit cleanly')
 		assert.ok(response.text.includes('compdef'), 'zsh completion should include compdef')
 		assert.ok(response.text.includes('_i18n'), 'zsh completion should define _i18n function')
 
-		const bashResponse = await runSpawn('node', [
-			path.join(__dirname, '../bin/i18n.js'),
-			'completion',
-			'bash',
-		])
+		const bashResponse = await runSpawn('node', [i18nBin, 'completion', 'bash'])
 		assert.ok(bashResponse.code === 0, 'i18n completion bash should exit cleanly')
 		assert.ok(
 			bashResponse.text.includes('complete -F'),
@@ -399,8 +390,8 @@ function testRender() {
 		assert.equal(pkg.scripts?.precommit, 'npm test')
 		assert.equal(pkg.scripts?.prepush, 'npm test')
 		assert.equal(pkg.scripts?.prepare, 'husky')
-		const text = await fs.loadDocument(path.join(__dirname, '../CONTRIBUTING.md'))
-		const str = String(text.content || text)
+		const doc = await fs.loadDocument('../CONTRIBUTING.md')
+		const str = String(doc?.content || doc || '')
 		assert.ok(str.includes('# Contributing'))
 	})
 
@@ -439,8 +430,9 @@ function testRender() {
 	 */
 	it('How to license? - [ISC LICENSE](./LICENSE) file.', async () => {
 		/** @docs */
-		const text = await fs.loadDocument(path.join(__dirname, '../LICENSE'))
-		assert.ok(String(text.content || text).includes('ISC'))
+		const doc = await fs.loadDocument('../LICENSE')
+		const str = String(doc?.content || doc || '')
+		assert.ok(str.includes('ISC'))
 	})
 }
 
@@ -454,9 +446,9 @@ describe('Rendering README.md', async () => {
 	const format = new Intl.NumberFormat('en-US').format
 	const parser = new DocsParser()
 	text = String(parser.decode(testRender))
-	await fs.saveDocument(path.join(__dirname, '../README.md'), text)
+	await fs.saveDocument('README.md', text)
 	const dataset = DatasetParser.parse(text, pkg.name)
-	await fs.saveDocument(path.join(__dirname, '../.datasets/README.dataset.jsonl'), dataset)
+	await fs.saveDocument('.datasets/README.dataset.jsonl', dataset)
 
 	it(`document is rendered in README.md [${format(Buffer.byteLength(text))}b]`, async () => {
 		const doc = await fs.loadDocument('README.md')

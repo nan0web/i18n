@@ -1,7 +1,8 @@
 export { I18nDb };
+export { createT } from "@nan0web/types";
 export default i18n;
-export type TFunction = import("./I18nDb.js").TFunction;
+export type TFunction = import("@nan0web/types").TFunction;
 import I18nDb from './I18nDb.js';
 import i18n from './i18n.js';
-export { i18n, createT, defaultVocab } from "./i18n.js";
-export { extract, extractInfo, EXTRACT_FIELDS } from "./extract.js";
+export { i18n, defaultVocab } from "./i18n.js";
+export { extract, extractFromModels, extractInfo, EXTRACT_FIELDS } from "./extract.js";

@@ -15,6 +15,7 @@
 		"@nan0web/db-fs",
 		"@nan0web/event",
 		"@nan0web/log",
-		"@nan0web/test"
+		"@nan0web/test",
+		"@nan0web/types"
 	]
 }
