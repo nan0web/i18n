@@ -9,30 +9,16 @@ export const defaultVocab = {
 		'This way it is no need to create default (English) version vocab',
 }
 
+import { TFunction } from '@nan0web/types'
+
 /**
  * Creates a translation function bound to a specific vocabulary.
  *
- * @param {Object<string, string> | Map<string, string>} vocab - Mapping from keys to localized strings.
- * @returns {import("./I18nDb").TFunction} Translation function.
- *
- * The returned function looks up the key in the supplied vocabulary.
- * If the key is missing, it returns the original key.
- * Placeholders in the form `{name}` are replaced by values from the `vars` object.
- *
- * Example:
- *   const t = createT({ "Hello {name}": "{name}, вітаю!" })
- *   t("Hello {name}", { name: "Іван" }) // → "Іван, вітаю!"
+ * @param {Object<string, string> | Map<string, string>} vocab
+ * @param {string} [locale='en']
+ * @returns {function(string, Record<string, any>=): string}
  */
-export function createT(vocab) {
-	const map =
-		vocab instanceof Map ? vocab : new Map(Array.isArray(vocab) ? vocab : Object.entries(vocab))
-	return function t(key, vars = {}) {
-		const template = String(map.get(key) ?? key)
-		return template.replace(/{([^}]+)}/g, (_, name) =>
-			Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : `{${name}}`,
-		)
-	}
-}
+export { TFunction, TFunction as createT }
 
 /**
  * Selects appropriate vocabulary dictionary by locale.

@@ -3,7 +3,7 @@ import extract, { extractFromModels } from './extract.js'
 import event from '@nan0web/event'
 
 /**
- * @typedef {function(string, Record<string, string|number>): string} TFunction
+ * @typedef {import("@nan0web/types").TFunctionFunc} TFunction
  */
 
 /**
@@ -154,7 +154,7 @@ export default class I18nDb {
 
 		const url = this.db.resolveSync(locale, uri)
 		const vocab = await this.loadT(url)
-		const t = createT(vocab)
+		const t = createT(vocab, locale)
 		this._tFunctions.set(uri, t)
 		return t
 	}
@@ -208,7 +208,7 @@ export default class I18nDb {
 	 * @param {Record<string, Function>|Function[]} [models] - defaults to this.models
 	 * @returns {Promise<Map<string, {missing: string[], unused: string[]}>>}
 	 */
-	async auditFromModels(models = this.models) {
+	async auditModels(models = this.models) {
 		const modelKeys = this.extractKeysFromModels(models)
 		const map = new Map()
 		for (const locale of this.locales) {
@@ -232,7 +232,7 @@ export default class I18nDb {
 	 * @param {boolean} [opts.useKeyAsDefault]
 	 * @returns {Promise<{ codeKeys: string[] }>}
 	 */
-	async syncFromModels(targetUri = '', opts = {}) {
+	async syncModels(targetUri = '', opts = {}) {
 		const { models = this.models, useKeyAsDefault = this.useKeyAsDefault } = opts
 
 		const modelKeys = this.extractKeysFromModels(models)
@@ -283,7 +283,7 @@ export default class I18nDb {
 	}
 
 	/**
-	 * @deprecated Use `auditFromModels(models)` instead.
+	 * @deprecated Use `auditModels(models)` instead.
 	 * Audit translations by comparing keys in code with those in DB
 	 * @param {string} [srcPath] - path to source directory (e.g. 'src/'), defaults to this.srcDir
 	 * @returns {Promise<Map<string, {missing: string[], unused: string[]}>>}
@@ -304,7 +304,7 @@ export default class I18nDb {
 	}
 
 	/**
-	 * @deprecated Use `syncFromModels(targetUri, opts)` instead.
+	 * @deprecated Use `syncModels(targetUri, opts)` instead.
 	 * Sync translations for all locales by adding new keys from code as empty string values
 	 * @param {string} [targetUri] - target path for saving t.json (e.g. 'apps/topup-tel')
 	 * @param {Object} [opts] { useKeyAsDefault, srcPath }
@@ -343,7 +343,7 @@ export default class I18nDb {
 	}
 
 	/**
-	 * @deprecated Use `syncFromModels('', opts)` instead.
+	 * @deprecated Use `syncModels('', opts)` instead.
 	 * Sync translations for all locales at the root level.
 	 *
 	 * @param {Object} [opts] Options for syncTranslations.

@@ -104,6 +104,8 @@ describe('extract()', () => {
 		console.assert(keys.includes('Wat'))
 		console.assert(keys.includes('Custom error'))
 		console.assert(keys.includes('General error'))
+	})
+
 	it('should extract any dynamic field starting with specified prefixes', () => {
 		const content = `
 		static properties = {
@@ -142,6 +144,21 @@ describe('extractFromModels()', () => {
 		console.assert(keys.includes('Invalid locale format'), 'should include Invalid locale format')
 		console.assert(keys.includes('Language icon'), 'should include Language icon')
 		console.assert(keys.length === 5, `expected 5 keys, got ${keys.length}: ${keys}`)
+	})
+
+	it('should extract wildcard fields (label_short, error_invalid)', () => {
+		class CustomModel {
+			static username = {
+				label_short: 'User',
+				error_invalid: 'Format is wrong',
+				help_alt: 'Use your email',
+			}
+		}
+		const keys = extractFromModels({ CustomModel })
+		console.assert(keys.includes('User'))
+		console.assert(keys.includes('Format is wrong'))
+		console.assert(keys.includes('Use your email'))
+		console.assert(keys.length === 3)
 	})
 
 	it('should extract keys from an array of models', () => {

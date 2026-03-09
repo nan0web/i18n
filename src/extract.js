@@ -120,41 +120,49 @@ export function extract(content) {
  * // → ['Invalid locale format', 'Language icon', 'Language title', 'Locale', 'Locale not found']
  */
 export function extractFromModels(models) {
-	const fieldPatterns = EXTRACT_FIELDS.map((s) => {
-		const base = s.replace('*', '')
-		return base
-	})
-
 	const keys = new Set()
 	const classList = Array.isArray(models) ? models : Object.values(models)
+	const fieldPatterns = EXTRACT_FIELDS.map((f) => new RegExp('^' + f.replace(/\*/g, '.*') + '$'))
+
+	const addIfMatches = (obj) => {
+		if (!obj || typeof obj !== 'object') return
+		for (const [key, value] of Object.entries(obj)) {
+			if (typeof value !== 'string') continue
+			const matches = fieldPatterns.some((re) => re.test(key))
+			if (matches) keys.add(value)
+		}
+	}
 
 	for (const Model of classList) {
 		if (!Model || typeof Model !== 'function') continue
 
-		for (const [, meta] of Object.entries(Model)) {
-			if (!meta || typeof meta !== 'object') continue
+		// 1. Scan static properties of the class
+		for (const [propName, propValue] of Object.entries(Model)) {
+			// Skip internal/non-schema properties
+			if (propName === 'prototype' || propName === 'length' || propName === 'name') continue
 
-			for (const [fieldName, fieldValue] of Object.entries(meta)) {
-				if (typeof fieldValue !== 'string') continue
+			if (typeof propValue === 'string') {
+				// Rare case: static property is a string key itself
+				const matches = fieldPatterns.some((re) => re.test(propName))
+				if (matches) keys.add(propValue)
+			} else if (propValue && typeof propValue === 'object') {
+				// Standard case: propValue is { label: '...', help: '...' }
+				for (const [key, value] of Object.entries(propValue)) {
+					if (typeof value !== 'string') continue
+					const matches = fieldPatterns.some((re) => re.test(key))
+					if (matches) keys.add(value)
+				}
 
-				const matches = fieldPatterns.some((prefix) => fieldName.startsWith(prefix))
-				if (!matches) continue
-
-				// Skip 'value' inside options arrays (same rule as extract())
-				// Not needed here because we're iterating static properties, not options arrays.
-				keys.add(fieldValue)
-			}
-
-			// Also check nested options for label* fields (but skip value* inside options)
-			if (Array.isArray(meta.options)) {
-				for (const opt of meta.options) {
-					if (!opt || typeof opt !== 'object') continue
-					for (const [optKey, optVal] of Object.entries(opt)) {
-						if (typeof optVal !== 'string') continue
-						const matches = fieldPatterns.some((prefix) => optKey.startsWith(prefix))
-						// Ignore value* inside options (consistent with extract())
-						if (matches && !optKey.startsWith('value')) {
-							keys.add(optVal)
+				// Check nested options (label* fields, but skip value* to avoid data corruption)
+				if (Array.isArray(propValue.options)) {
+					for (const opt of propValue.options) {
+						if (!opt || typeof opt !== 'object') continue
+						for (const [optKey, optVal] of Object.entries(opt)) {
+							if (typeof optVal !== 'string') continue
+							// Rule: Skip 'value' inside options to avoid translating database IDs
+							if (optKey === 'value' || optKey.startsWith('value')) continue
+							const matches = fieldPatterns.some((re) => re.test(optKey))
+							if (matches) keys.add(optVal)
 						}
 					}
 				}
