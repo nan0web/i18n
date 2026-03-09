@@ -4,7 +4,8 @@ import DB from '@nan0web/db'
 import FS from '@nan0web/db-fs'
 import { NoConsole } from '@nan0web/log'
 import { DocsParser, runSpawn, DatasetParser } from '@nan0web/test'
-import { createT, extract, i18n, I18nDb } from './index.js'
+import { createT, extract, extractFromModels, i18n, I18nDb } from './index.js'
+import { Language } from './domain/Language.js'
 
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -63,7 +64,7 @@ function testRender() {
 	 *
 	 * |Package name|[Status](https://github.com/nan0web/monorepo/blob/main/system.md#написання-сценаріїв)|Documentation|Test coverage|Features|Npm version|
 	 * |---|---|---|---|---|---|
-	 * |[@nan0web/i18n](https://github.com/nan0web/i18n/) |🟡 `83.8%` |🧪 [English 🏴󠁧󠁢󠁥󠁮󠁧󠁿](https://github.com/nan0web/i18n/blob/main/README.md)<br />[Українською 🇺🇦](https://github.com/nan0web/i18n/blob/main/docs/uk/README.md) |- |✅ d.ts 📜 system.md 🕹️ playground |1.0.4 |
+	 * |[@nan0web/i18n](https://github.com/nan0web/i18n/) |🟢 `100%` |🧪 [English 🏴󠁧󠁢󠁥󠁮󠁧󠁿](https://github.com/nan0web/i18n/blob/main/README.md)<br />[Українською 🇺🇦](https://github.com/nan0web/i18n/blob/main/docs/uk/README.md) |- |✅ d.ts 📜 system.md 🕹️ playground |1.1.0 |
 	 *
 	 * ## Installation
 	 */
@@ -143,23 +144,34 @@ function testRender() {
 	 *
 	 * ## 🏛️ Core i18n Architecture
 	 *
-	 * ### 1. Decentralization & Namespacing
+	 * ### 1. Model-Only Paradigm (v1.1.0+)
+	 * **All translatable text must live in exported Model classes.**
+	 * String literals in `t()` calls are **forbidden**.
+	 *
+	 * ```js
+	 * // ✅ Correct — key from Model
+	 * t(Language.title.help)
+	 *
+	 * // ❌ Forbidden — hardcoded string
+	 * t('Language title')
+	 * ```
+	 *
+	 * ### 2. Decentralization & Namespacing
 	 * To avoid collisions between hundreds of packages, we use **dot notation**:
 	 * - `ui-cli.Pick a color`
 	 * - `core.User age`
-	 * This keeps vocabularies isolated yet accessible to a global aggregator.
 	 *
-	 * ### 2. "Pure Model" Principle
+	 * ### 3. "Pure Model" Principle
 	 * Models are data structures. They shouldn't know about the current UI language:
-	 * - **In Model**: `help: "Unique user name"` (this is a key)
-	 * - **In UI/Adapter**: `t(model.help)` (resolution happens here)
+	 * - **In Model**: `static title = { help: "Language title" }` — this is the i18n key
+	 * - **In UI/Adapter**: `t(Language.title.help)` — resolution happens here
+	 * - **Mandatory Export**: every Model with i18n fields **must** be `export class`
 	 *
-	 * ### 3. Cascading Fallback
+	 * ### 4. Cascading Fallback
 	 * If a translation is missing, the system follows a trust algorithm:
 	 * 1. **Look in local vocabulary** of the product.
 	 * 2. **Look in parent vocabularies** (via `I18nDb` segments).
-	 * 3. **English variant** (as the base development language).
-	 * 4. **Original Key** (as a final fallback).
+	 * 3. **Original Key from the Model** (as a final fallback).
 	 */
 	it('How to handle translations with missing keys?', () => {
 		//import { i18n, createT } from "@nan0web/i18n"
@@ -212,9 +224,60 @@ function testRender() {
 
 	/**
 	 * @docs
-	 * ## Keywords extractions
+	 * ## Key Extraction
+	 *
+	 * ### `extractFromModels(models)` — Primary (v1.1.0+)
+	 *
+	 * Extracts i18n keys directly from exported Model classes.
+	 * Supports both **camelCase** (`errorInvalid`, `helpAlt`) and **snake_case** (`error_invalid`, `help_alt`).
+	 *
+	 * Extractable fields: `help*`, `label*`, `title*`, `placeholder*`, `message*`, `error*`, `value*`.
 	 */
-	it('How to extract translation keys directly from your source code?', () => {
+	it('How to extract translation keys from Model classes?', () => {
+		//import { extractFromModels } from "@nan0web/i18n"
+		//import { Language } from "./domain/Language.js"
+
+		const keys = extractFromModels({ Language })
+		console.info(keys)
+		// ← ['Invalid locale format', 'Language icon', 'Language title', 'Locale', 'Locale not found']
+		assert.equal(keys.length, 5)
+		assert.ok(keys.includes('Language title'))
+		assert.ok(keys.includes('Locale not found'))
+	})
+
+	/**
+	 * @docs
+	 *
+	 * CamelCase and snake_case field names are both supported:
+	 */
+	it('extractFromModels supports camelCase and snake_case fields', () => {
+		class UserModel {
+			static email = {
+				help: 'Email address',
+				errorInvalid: 'Invalid email',
+				error_required: 'Email is required',
+				labelShort: 'Email',
+				placeholder: 'user@example.com',
+			}
+		}
+		const keys = extractFromModels({ UserModel })
+		console.info(keys)
+		assert.equal(keys.length, 5)
+		assert.ok(keys.includes('Email address')) // help
+		assert.ok(keys.includes('Invalid email')) // errorInvalid (camelCase)
+		assert.ok(keys.includes('Email is required')) // error_required (snake_case)
+		assert.ok(keys.includes('Email')) // labelShort (camelCase)
+		assert.ok(keys.includes('user@example.com')) // placeholder
+	})
+
+	/**
+	 * @docs
+	 *
+	 * ### `extract(content)` — Legacy (source code scanning)
+	 *
+	 * > ⚠️ Deprecated in favor of `extractFromModels()`. Retained for backward compatibility.
+	 */
+	it('How to extract translation keys from source code? (legacy)', () => {
 		//import { extract } from "@nan0web/i18n"
 		const content = `
 		console.log(t("Hello, {name}!"))
@@ -229,23 +292,45 @@ function testRender() {
 	 * @docs
 	 * ## API
 	 *
-	 * ### `createT(vocab)`
+	 * ### `createT(vocab, locale?)`
 	 * Creates a translation function bound to the supplied vocabulary.
+	 * Since v1.1.0, delegates to `@nan0web/types` `TFunction` which supports
+	 * ICU-like plurals (`$count`, `$ordinal`) and locale-aware rules.
 	 *
 	 * * **Parameters**
 	 *   * `vocab` – an object mapping English keys to localized strings.
+	 *   * `locale` – (optional, default `'en'`) locale for plural rules.
 	 *
 	 * * **Returns**
 	 *   * `function t(key, vars?)` – a translation function.
 	 *
 	 * #### Translation function `t(key, vars?)`
 	 * * **Parameters**
-	 *   * `key` – the original English string.
+	 *   * `key` – the original English string (from `Model.field.help`).
 	 *   * `vars` – (optional) an object with placeholder values, e.g. `{ name: 'John' }`.
 	 * * **Behaviour**
 	 *   * Looks up `key` in the provided vocabulary.
 	 *   * If the key is missing, returns the original `key`.
 	 *   * Replaces placeholders of the form `{placeholder}` with values from `vars`.
+	 *
+	 * ### `extractFromModels(models)` *(v1.1.0+)*
+	 * Extracts translation keys directly from Model-as-Schema classes.
+	 *
+	 * * **Parameters**
+	 *   * `models` – object or array of exported Model classes.
+	 *
+	 * * **Returns**
+	 *   * `string[]` – sorted array of unique keys.
+	 *
+	 * ### `I18nDb` Methods *(v1.1.0+)*
+	 *   * `extractKeysFromModels(models?)` → `Set<string>`
+	 *   * `auditModels(models?)` → `Map<locale, {missing, unused}>`
+	 *   * `syncModels(targetUri?, opts?)` → writes missing keys to t.json
+	 *
+	 * ### Deprecated Methods
+	 *   * ~~`extractKeysFromCode(srcPath)`~~ → use `extractKeysFromModels()`
+	 *   * ~~`auditTranslations(srcPath)`~~ → use `auditModels()`
+	 *   * ~~`syncTranslations(targetUri, opts)`~~ → use `syncModels()`
 	 *
 	 * ### `i18n(mapLike)`
 	 * Utility function to select the appropriate vocabulary dictionary by locale.
@@ -285,10 +370,10 @@ function testRender() {
 	 * ```
 	 *
 	 * #### `i18n audit`
-	 * Audits i18n keys and finds missing or unused translations.
+	 * Audits i18n keys using `extractKeysFromModels()` and finds missing or unused translations.
 	 *
 	 * #### `i18n sync`
-	 * Syncs translations between vocabularies.
+	 * Syncs translations using Model keys as the single source of truth.
 	 *
 	 * #### `i18n completion`
 	 * Generates a shell completion script for bash or zsh.
