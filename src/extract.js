@@ -124,50 +124,44 @@ export function extractFromModels(models) {
 	const classList = Array.isArray(models) ? models : Object.values(models)
 	const fieldPatterns = EXTRACT_FIELDS.map((f) => new RegExp('^' + f.replace(/\*/g, '.*') + '$'))
 
-	const addIfMatches = (obj) => {
-		if (!obj || typeof obj !== 'object') return
-		for (const [key, value] of Object.entries(obj)) {
-			if (typeof value !== 'string') continue
-			const matches = fieldPatterns.some((re) => re.test(key))
-			if (matches) keys.add(value)
+	const scanObject = (obj) => {
+		if (!obj || (typeof obj !== 'object' && typeof obj !== 'function')) return
+
+		for (const [propName, propValue] of Object.entries(obj)) {
+			// Skip internal/non-schema properties if it's a class
+			if (propName === 'prototype' || propName === 'length' || propName === 'name') continue
+
+			if (typeof propValue === 'string') {
+				const matches = fieldPatterns.some((re) => re.test(propName))
+				if (matches) keys.add(propValue)
+			} else if (propValue && typeof propValue === 'object') {
+				// Recursive scan for nested UI or field objects
+				// but check if it's an array (options)
+				if (Array.isArray(propValue)) {
+					// Handle options array specifically
+					if (propName === 'options') {
+						for (const opt of propValue) {
+							if (!opt || typeof opt !== 'object') continue
+							for (const [optKey, optVal] of Object.entries(opt)) {
+								if (typeof optVal !== 'string') continue
+								// Rule: Skip 'value' inside options to avoid translating database IDs
+								if (optKey === 'value' || optKey.startsWith('value')) continue
+								const matches = fieldPatterns.some((re) => re.test(optKey))
+								if (matches) keys.add(optVal)
+							}
+						}
+					}
+				} else {
+					// Generic object recursion
+					scanObject(propValue)
+				}
+			}
 		}
 	}
 
 	for (const Model of classList) {
 		if (!Model || typeof Model !== 'function') continue
-
-		// 1. Scan static properties of the class
-		for (const [propName, propValue] of Object.entries(Model)) {
-			// Skip internal/non-schema properties
-			if (propName === 'prototype' || propName === 'length' || propName === 'name') continue
-
-			if (typeof propValue === 'string') {
-				// Rare case: static property is a string key itself
-				const matches = fieldPatterns.some((re) => re.test(propName))
-				if (matches) keys.add(propValue)
-			} else if (propValue && typeof propValue === 'object') {
-				// Standard case: propValue is { label: '...', help: '...' }
-				for (const [key, value] of Object.entries(propValue)) {
-					if (typeof value !== 'string') continue
-					const matches = fieldPatterns.some((re) => re.test(key))
-					if (matches) keys.add(value)
-				}
-
-				// Check nested options (label* fields, but skip value* to avoid data corruption)
-				if (Array.isArray(propValue.options)) {
-					for (const opt of propValue.options) {
-						if (!opt || typeof opt !== 'object') continue
-						for (const [optKey, optVal] of Object.entries(opt)) {
-							if (typeof optVal !== 'string') continue
-							// Rule: Skip 'value' inside options to avoid translating database IDs
-							if (optKey === 'value' || optKey.startsWith('value')) continue
-							const matches = fieldPatterns.some((re) => re.test(optKey))
-							if (matches) keys.add(optVal)
-						}
-					}
-				}
-			}
-		}
+		scanObject(Model)
 	}
 
 	return [...keys].sort()
