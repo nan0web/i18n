@@ -1,7 +1,10 @@
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import i18n, { createT } from './i18n.js'
-import uk from './vocabs/uk.js'
+const uk = {
+	'Welcome!': 'Вітаємо у пісочниці, {name}!',
+	'Try to use keys as default text': 'Використовуй ключі для перекладу як англійський текст',
+}
 
 describe('i18n', () => {
 	it('should return defaultValue when locale is not found', () => {

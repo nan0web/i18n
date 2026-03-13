@@ -4,16 +4,14 @@ import DB from '@nan0web/db'
 import I18nDb from './I18nDb.js'
 
 const predefined = new Map([
-	['data/_/langs.json', { uk: 'Ukrainian' }],
-	['data/uk/_/t.json', { 'Welcome!': 'Ласкаво просимо!', Home: 'Дім' }],
+	['data/uk/_/t', { 'Welcome!': 'Ласкаво просимо!', Home: 'Дім' }],
 	[
-		'data/uk/apps/topup-tel/_/t.json',
+		'data/uk/apps/topup-tel/_/t',
 		{ 'Top-up Telephone': 'Поповнення телефону', Home: 'Головна' },
 	],
 ])
 const i18nDbOptions = {
 	locale: 'uk',
-	tPath: '_/t',
 	dataDir: 'data',
 	srcDir: 'src',
 }
@@ -90,7 +88,6 @@ describe('I18nDb', () => {
 		i18n = new I18nDb({
 			db,
 			locale: 'uk',
-			tPath: '_/t',
 			dataDir: 'data',
 			srcDir: 'src',
 			langs: { uk: true, en: true },
@@ -188,7 +185,7 @@ describe('I18nDb', () => {
 	it.todo('should audit translations and return missing and unused keys', async () => {
 		const map = new Map(predefined)
 		map.set('src/example.js', `t("Used Key")\nt("Another Used Key")`)
-		map.set('data/uk/_/t.json', {
+		map.set('data/uk/_/t', {
 			'Used Key': 'Використаний ключ',
 			'Unused Key': 'Невикористаний ключ',
 		})

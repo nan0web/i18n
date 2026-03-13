@@ -46,15 +46,15 @@ export default async function generate(options = {}) {
 
 	// Find all locales with _/t.yaml
 	const locales = fs.readdirSync(dataDir).filter((d) => {
-		if (d === '_') return false
-		const tPath = path.join(dataDir, d, '_', 't.yaml')
+		if (d === db.Directory.FILE) return false
+		const tPath = path.join(dataDir, d, db.Directory.FILE, 't.yaml')
 		return fs.existsSync(tPath)
 	})
 
 	let generated = 0
 
 	for (const locale of locales) {
-		const translations = await db.loadDocument(`${locale}/_/t.yaml`)
+		const translations = await db.loadDocument(`${locale}/${db.Directory.FILE}/t.yaml`)
 		const jsContent = generateJS(locale, translations)
 		const outPath = path.join(outDir, `${locale}.js`)
 

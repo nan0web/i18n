@@ -6,7 +6,7 @@ generate translation functions for any language.
 
 |Package name|[Status](https://github.com/nan0web/monorepo/blob/main/system.md#написання-сценаріїв)|Documentation|Test coverage|Features|Npm version|
 |---|---|---|---|---|---|
-|[@nan0web/i18n](https://github.com/nan0web/i18n/) |🟢 `100%` |🧪 [English 🏴󠁧󠁢󠁥󠁮󠁧󠁿](https://github.com/nan0web/i18n/blob/main/README.md)<br />[Українською 🇺🇦](https://github.com/nan0web/i18n/blob/main/docs/uk/README.md) |- |✅ d.ts 📜 system.md 🕹️ playground |1.1.0 |
+|[@nan0web/i18n](https://github.com/nan0web/i18n/) |🟢 `100%` |🧪 [English 🏴󠁧󠁢󠁥󠁮󠁧󠁿](https://github.com/nan0web/i18n/blob/main/README.md)<br />[Українською 🇺🇦](https://github.com/nan0web/i18n/blob/main/docs/uk/README.md) |- |✅ d.ts 📜 system.md 🕹️ playground |1.2.0 |
 
 ## Installation
 
@@ -98,9 +98,9 @@ import DB from "@nan0web/db"
 import { I18nDb } from "@nan0web/i18n"
 const db = new DB({
 	predefined: new Map([
-		['data/uk/_/t.json', { 'Welcome!': 'Ласкаво просимо!', Home: 'Дім' }],
+		['data/uk/_/t', { 'Welcome!': 'Ласкаво просимо!', Home: 'Дім' }],
 		[
-			'data/uk/apps/topup-tel/_/t.json',
+			'data/uk/apps/topup-tel/_/t',
 			{
 				'ui-cli.Volume': 'Гучність',
 				'Top-up Telephone': 'Поповнення телефону',
@@ -110,7 +110,7 @@ const db = new DB({
 	]),
 })
 await db.connect()
-const i18n = new I18nDb({ db, locale: 'uk', tPath: '_/t.json', dataDir: 'data' })
+const i18n = new I18nDb({ db, locale: 'uk', dataDir: 'data' })
 const t = await i18n.createT('uk', 'apps/topup-tel')
 console.info(t('ui-cli.Volume')) // ← "Гучність" (namespaced)
 console.info(t('Top-up Telephone')) // ← "Поповнення телефону"
@@ -201,7 +201,7 @@ Extracts translation keys directly from Model-as-Schema classes.
 ### `I18nDb` Methods *(v1.1.0+)*
   * `extractKeysFromModels(models?)` → `Set<string>`
   * `auditModels(models?)` → `Map<locale, {missing, unused}>`
-  * `syncModels(targetUri?, opts?)` → writes missing keys to t.json
+  * `syncModels(targetUri?, opts?)` → writes missing keys to t.yaml
 
 ### Deprecated Methods
   * ~~`extractKeysFromCode(srcPath)`~~ → use `extractKeysFromModels()`
@@ -238,7 +238,7 @@ npx i18n <command>
 Generates Java•Script cache files from YAML source of truth. This is useful for web bundles (Vite/Webpack) to avoid parsing YAML at runtime.
 
 - **Options**
-  - `--data <dir>` – Data directory containing `{locale}/_/t.yaml` (default: `./data`)
+  - `--data <dir>` – Data directory containing `{locale}/_/t` (default: `./data`)
   - `--out <dir>` – Output directory for `.js` files (default: `./src/i18n`)
 
 ```bash

@@ -54,7 +54,7 @@ switch (command) {
 		console.error('  info               Show current extraction logic and fields')
 		console.error('  audit              Audit i18n keys')
 		console.error('  sync               Sync translations')
-		console.error('    --yaml           Sync into _/t.yaml instead of _/t.json')
+		console.error('    --json           Sync into t.json instead of t.yaml')
 		console.error('  generate           Generate JS cache from YAML')
 		console.error('    --data <dir>     Data directory (default: ./data)')
 		console.error('    --out <dir>      Output directory (default: ./src/i18n)')

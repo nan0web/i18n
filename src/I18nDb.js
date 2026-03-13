@@ -11,18 +11,46 @@ import event from '@nan0web/event'
  * Supports hierarchical loading, reactive updates and configurable t.json path.
  */
 export default class I18nDb {
+	/** @type {import('@nan0web/db').default} */
+	db
+	/**
+	 * @type {string}
+	 * @deprecated - use models with the provided data models with meta fields
+	 */
+	srcDir
+	/** @type {string} */
+	locale
+	/** @type {string} */
+	tPath
+	/** @type {string} */
+	langsPath
+	/** @type {string} */
+	dataDir
+	/** @type {Record<string, Record<string, string>>|Array<{value: string, label: string}>} */
+	langs
+	/** @type {Record<string, Function>|Function[]} */
+	models
+	/** @type {boolean} */
+	useKeyAsDefault
+	/** @type {import('@nan0web/event/types/types/index.js').EventBus} */
+	emitter
+	/** @type {Map<string, Record<string,string>>} */
+	_cache
+	/** @type {Map<string, TFunction>} */
+	_tFunctions
+
 	/**
 	 * Creates an instance of I18nDb.
 	 * @param {Object} input
 	 * @param {import("@nan0web/db").default} input.db
 	 * @param {string} [input.locale="en"]
-	 * @param {string} [input.tPath="_/t"] - path suffix to look for translation files
-	 * @param {string} [input.langsPath="_/langs"] - path of the languages config that stores Record<locale: string, any>
+	 * @param {string} [input.tPath] - path suffix to look for translation files (default: _/t.yaml)
+	 * @param {string} [input.langsPath] - path of the languages config (default: _/langs)
 	 * @param {import("@nan0web/event/types/types/index.js").EventBus} [input.emitter]
 	 * @param {string} [input.dataDir="data"]
 	 * @param {string} [input.srcDir="src"]
 	 * @param {string} [input.useKeyAsDefault=false]
-	 * @param {Record<string, Record<string, string>>} [input.langs={}]
+	 * @param {Record<string, Record<string, string>>|Array<{value: string, label: string}>} [input.langs={}]
 	 * @param {Record<string, Function>|Function[]} [input.models={}] - Model-as-Schema classes for key extraction
 	 */
 	constructor(input) {
@@ -30,8 +58,6 @@ export default class I18nDb {
 			db,
 			emitter,
 			locale = 'en',
-			tPath = '_/t',
-			langsPath = '_/langs',
 			dataDir = 'data',
 			srcDir = 'src',
 			langs = {},
@@ -41,8 +67,8 @@ export default class I18nDb {
 
 		this.db = db
 		this.locale = locale
-		this.tPath = tPath
-		this.langsPath = langsPath
+		this.tPath = input.tPath ?? (db?.Directory?.FILE ? `${db.Directory.FILE}/t` : '_/t')
+		this.langsPath = input.langsPath ?? (db?.Directory?.FILE ? `${db.Directory.FILE}/langs` : '_/langs')
 		this.dataDir = dataDir.endsWith('/') ? dataDir.slice(0, -1) : dataDir
 		this.srcDir = srcDir.endsWith('/') ? srcDir.slice(0, -1) : srcDir
 		this.langs = langs
@@ -61,7 +87,7 @@ export default class I18nDb {
 	 * @returns {Promise<void>}
 	 */
 	async connect() {
-		this.langs = await this.db.loadDocument(this.dataPath + this.langsPath)
+		this.langs = (await this.db.loadDocument(this.dataPath + this.langsPath, null)) || this.langs
 	}
 
 	/**
@@ -115,7 +141,8 @@ export default class I18nDb {
 	 * @returns {Promise<Record<string,string>>}
 	 */
 	async loadT(uri) {
-		if (this._cache.has(uri)) return this._cache.get(uri)
+		const cached = this._cache.get(uri)
+		if (cached) return cached
 
 		/** @type {Record<string,string>} */
 		const vocab = {}
@@ -150,13 +177,14 @@ export default class I18nDb {
 	 * @returns {Promise<TFunction>}
 	 */
 	async createT(locale = this.locale, uri = '') {
-		if (this._tFunctions.has(uri)) return this._tFunctions.get(uri)
+		const t = this._tFunctions.get(uri)
+		if (t) return t
 
 		const url = this.db.resolveSync(locale, uri)
 		const vocab = await this.loadT(url)
-		const t = createT(vocab, locale)
-		this._tFunctions.set(uri, t)
-		return t
+		const newT = createT(vocab, locale)
+		this._tFunctions.set(uri, newT)
+		return newT
 	}
 
 	/**

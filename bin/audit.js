@@ -13,7 +13,7 @@ export default async function audit() {
 	const db = new DBFS()
 	await db.connect()
 
-	const i18n = new I18nDb({ db, tPath: '_/t.json', dataDir: 'data', srcDir: 'src' })
+	const i18n = new I18nDb({ db, dataDir: 'data', srcDir: 'src' })
 	await i18n.connect()
 
 	for (const locale of i18n.locales) {

@@ -45,15 +45,15 @@ describe('v1.0.6 — I18n Parser and Lang Options', () => {
 		assert.deepEqual(optsArr, [{ value: 'es', label: 'Español' }])
 	})
 
-	it('bin/sync.js uses _t.yaml if --yaml provided', async () => {
+	it('bin/sync.js uses _t.json if --json provided', async () => {
 		const bin = readFileSync(path.join(__dirname, '../../../bin/sync.js'), 'utf-8')
-		assert.ok(bin.includes('args.yaml'))
+		assert.ok(bin.includes('args.json'))
 	})
 
-	it('package.json version matches 1.0.6', () => {
-		assert.ok(
-			['1.0.6', '1.1.0'].includes(pkg.version),
-			`expected 1.0.6 or 1.1.0, got ${pkg.version}`,
+	it('package.json version matches 1.0.6+', () => {
+		assert(
+			['1.0.6', '1.1.0', '1.1.1', '1.2.0'].includes(pkg.version),
+			`expected 1.0.6, 1.1.0, 1.1.1 or 1.2.0, got ${pkg.version}`,
 		)
 	})
 })

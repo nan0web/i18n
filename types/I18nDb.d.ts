@@ -11,13 +11,13 @@ export default class I18nDb {
      * @param {Object} input
      * @param {import("@nan0web/db").default} input.db
      * @param {string} [input.locale="en"]
-     * @param {string} [input.tPath="_/t"] - path suffix to look for translation files
-     * @param {string} [input.langsPath="_/langs"] - path of the languages config that stores Record<locale: string, any>
+     * @param {string} [input.tPath] - path suffix to look for translation files (default: _/t.yaml)
+     * @param {string} [input.langsPath] - path of the languages config (default: _/langs)
      * @param {import("@nan0web/event/types/types/index.js").EventBus} [input.emitter]
      * @param {string} [input.dataDir="data"]
      * @param {string} [input.srcDir="src"]
      * @param {string} [input.useKeyAsDefault=false]
-     * @param {Record<string, Record<string, string>>} [input.langs={}]
+     * @param {Record<string, Record<string, string>>|Array<{value: string, label: string}>} [input.langs={}]
      * @param {Record<string, Function>|Function[]} [input.models={}] - Model-as-Schema classes for key extraction
      */
     constructor(input: {
@@ -29,21 +29,42 @@ export default class I18nDb {
         dataDir?: string | undefined;
         srcDir?: string | undefined;
         useKeyAsDefault?: string | undefined;
-        langs?: Record<string, Record<string, string>> | undefined;
+        langs?: Record<string, Record<string, string>> | {
+            value: string;
+            label: string;
+        }[] | undefined;
         models?: Record<string, Function> | Function[] | undefined;
     });
+    /** @type {import('@nan0web/db').default} */
     db: import("@nan0web/db").default;
-    locale: string;
-    tPath: string;
-    langsPath: string;
-    dataDir: string;
+    /**
+     * @type {string}
+     * @deprecated - use models with the provided data models with meta fields
+     */
     srcDir: string;
-    langs: Record<string, Record<string, string>>;
+    /** @type {string} */
+    locale: string;
+    /** @type {string} */
+    tPath: string;
+    /** @type {string} */
+    langsPath: string;
+    /** @type {string} */
+    dataDir: string;
+    /** @type {Record<string, Record<string, string>>|Array<{value: string, label: string}>} */
+    langs: Record<string, Record<string, string>> | Array<{
+        value: string;
+        label: string;
+    }>;
+    /** @type {Record<string, Function>|Function[]} */
     models: Record<string, Function> | Function[];
+    /** @type {boolean} */
     useKeyAsDefault: boolean;
-    _cache: Map<any, any>;
-    _tFunctions: Map<any, any>;
+    /** @type {import('@nan0web/event/types/types/index.js').EventBus} */
     emitter: import("@nan0web/event/types/types/index.js").EventBus;
+    /** @type {Map<string, Record<string,string>>} */
+    _cache: Map<string, Record<string, string>>;
+    /** @type {Map<string, TFunction>} */
+    _tFunctions: Map<string, TFunction>;
     /**
      * Connect to the database and load language definitions
      * @returns {Promise<void>}

@@ -6,7 +6,7 @@
 
 | Пакет                                             | [Статус](https://github.com/nan0web/monorepo/blob/main/system.md#написання-сценаріїв) | Документація                                                                                                                                            | Покриття | Можливості                         | Npm   |
 | ------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------- | ----- |
-| [@nan0web/i18n](https://github.com/nan0web/i18n/) | 🟢 `100%`                                                                             | 🧪 [English 🏴󠁧󠁢󠁥󠁮󠁧󠁿](https://github.com/nan0web/i18n/blob/main/README.md)<br />[Українською 🇺🇦](https://github.com/nan0web/i18n/blob/main/docs/uk/README.md) | -        | ✅ d.ts 📜 system.md 🕹️ playground | 1.1.0 |
+| [@nan0web/i18n](https://github.com/nan0web/i18n/) | 🟢 `100%`                                                                             | 🧪 [English 🏴󠁧󠁢󠁥󠁮󠁧󠁿](https://github.com/nan0web/i18n/blob/main/README.md)<br />[Українською 🇺🇦](https://github.com/nan0web/i18n/blob/main/docs/uk/README.md) | -        | ✅ d.ts 📜 system.md 🕹️ playground | 1.2.0 |
 
 ## Встановлення
 
@@ -105,9 +105,9 @@ import DB from '@nan0web/db'
 import { I18nDb } from '@nan0web/i18n'
 const db = new DB({
   predefined: new Map([
-    ['data/uk/_/t.json', { 'Welcome!': 'Ласкаво просимо!', Home: 'Дім' }],
+    ['data/uk/_/t', { 'Welcome!': 'Ласкаво просимо!', Home: 'Дім' }],
     [
-      'data/uk/apps/topup-tel/_/t.json',
+      'data/uk/apps/topup-tel/_/t',
       {
         'ui-cli.Volume': 'Гучність',
         'Top-up Telephone': 'Поповнення телефону',
@@ -117,7 +117,7 @@ const db = new DB({
   ]),
 })
 await db.connect()
-const i18n = new I18nDb({ db, locale: 'uk', tPath: '_/t.json', dataDir: 'data' })
+const i18n = new I18nDb({ db, locale: 'uk', dataDir: 'data' })
 const t = await i18n.createT('uk', 'apps/topup-tel')
 console.info(t('ui-cli.Volume')) // ← "Гучність" (з неймспейсом)
 console.info(t('Top-up Telephone')) // ← "Поповнення телефону"
@@ -254,7 +254,7 @@ npx i18n <команда>
 Генерує Java•Script кеш-файли з YAML джерела істини. Корисно для веб-бандлів (Vite/Webpack), щоб уникнути парсингу YAML під час виконання.
 
 - **Опції**
-  - `--data <dir>` — Директорія даних зі структурою `{locale}/_/t.yaml` (за замовчуванням: `./data`)
+  - `--data <dir>` — Директорія даних зі структурою `{locale}/_/t` (за замовчуванням: `./data`)
   - `--out <dir>` — Директорія виведення для `.js` файлів (за замовчуванням: `./src/i18n`)
 
 ```bash
