@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import DB from '@nan0web/db'
-import I18nDb from '../../../../src/I18nDb.js'
+import I18nDb from '../../../../../I18nDb.js'
 
 describe('Release v1.2.0: Move Translations to data/*/t.yaml', () => {
 	it('I18nDb should use t.yaml as default tPath', () => {

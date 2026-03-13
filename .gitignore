@@ -6,6 +6,7 @@
 /chat/
 /llm/
 /me.md
+.vscode/
 
 # Private agent under LICENSE
 .agent/

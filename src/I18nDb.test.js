@@ -99,55 +99,71 @@ describe('I18nDb', () => {
 		assert.equal(t2('Home'), 'Головна [updated]')
 	})
 
-	it.todo('should sync new translation keys with empty string values', async () => {
-		// Mock some code content with translation keys
-		const map = new Map(predefined)
-		map.set('src/example.js', `t("New Feature")\nt("Another New Key")`)
-		const db = new DB({ predefined: map })
-		await db.connect()
+	it('should syncModels new keys with useKeyAsDefault', async () => {
+		class FeatureModel {
+			static feature = { label: 'New Feature' }
+			static another = { label: 'Another New Key' }
+		}
 
-		const i18n = new I18nDb({ ...i18nDbOptions, db })
-		await i18n.connect()
-		await i18n.syncTranslations('apps/topup-tel', { useKeyAsDefault: true })
-
-		// Check each locale's vocab
-		const ukVocab = await db.loadDocument('data/uk/apps/topup-tel/_/t')
-		assert.equal(ukVocab['New Feature'], 'New Feature')
-		assert.equal(ukVocab['Another New Key'], 'Another New Key')
-	})
-
-	it.todo('should sync new translation keys with keys as default when enabled', async () => {
-		const map = new Map(predefined)
-		// Mock some code content with translation keys
-		map.set('src/example.js', `t("New Feature")\nt("Another New Key")`)
-		const db = new DB({ predefined: map })
-		await db.connect()
-
-		const i18n = new I18nDb({ ...i18nDbOptions, db })
-		await i18n.connect()
-		await i18n.syncTranslations('apps/topup-tel', { useKeyAsDefault: true })
+		const i18nSync = new I18nDb({
+			...i18nDbOptions,
+			db,
+			langs: [{ locale: 'uk', title: 'Українська' }],
+			models: { FeatureModel },
+			useKeyAsDefault: true,
+		})
+		await i18nSync.connect()
+		await i18nSync.syncModels('apps/topup-tel')
 
 		const ukVocab = await db.loadDocument('data/uk/apps/topup-tel/_/t')
 		assert.equal(ukVocab['New Feature'], 'New Feature')
 		assert.equal(ukVocab['Another New Key'], 'Another New Key')
 	})
 
-	it.todo('should not update existing translations', async () => {
-		const map = new Map(predefined)
-		// Mock some code content with translation keys
-		map.set('src/example.js', `t("New Feature")\nt("Another New Key")`)
-		const db = new DB({ predefined: map })
-		await db.connect()
+	it('should syncModels new keys with empty string by default', async () => {
+		class EmptyModel {
+			static item = { label: 'Sync Empty Key' }
+		}
 
-		const i18n = new I18nDb({ ...i18nDbOptions, db })
-		await i18n.connect()
+		const i18nSync = new I18nDb({
+			...i18nDbOptions,
+			db,
+			langs: [{ locale: 'uk', title: 'Українська' }],
+			models: { EmptyModel },
+			useKeyAsDefault: false,
+		})
+		await i18nSync.connect()
+		await i18nSync.syncModels('apps/topup-tel')
 
-		await db.saveDocument('data/uk/apps/topup-tel/_/t', { 'New Feature': 'Поповнення' })
-		await i18n.syncTranslations('apps/topup-tel')
+		const ukVocab = await db.loadDocument('data/uk/apps/topup-tel/_/t')
+		assert.equal(ukVocab['Sync Empty Key'], '')
+	})
+
+	it('should not update existing translations via syncModels', async () => {
+		class UpdateModel {
+			static feature = { label: 'New Feature' }
+			static another = { label: 'Another New Key' }
+		}
+
+		// Pre-set an existing translation
+		await db.saveDocument('data/uk/apps/topup-tel/_/t', {
+			'Top-up Telephone': 'Поповнення телефону',
+			Home: 'Головна',
+			'New Feature': 'Поповнення',
+		})
+
+		const i18nSync = new I18nDb({
+			...i18nDbOptions,
+			db,
+			langs: [{ locale: 'uk', title: 'Українська' }],
+			models: { UpdateModel },
+		})
+		await i18nSync.connect()
+		await i18nSync.syncModels('apps/topup-tel')
 
 		const vocab = await db.loadDocument('data/uk/apps/topup-tel/_/t')
 		assert.equal(vocab['New Feature'], 'Поповнення') // unchanged
-		assert.equal(vocab['Another New Key'], '') // added
+		assert.equal(vocab['Another New Key'], '') // added with empty default
 	})
 
 	it('should switch locale and return translation function', async () => {
@@ -182,42 +198,59 @@ describe('I18nDb', () => {
 		assert.equal(emittedError.message, 'File not found')
 	})
 
-	it.todo('should audit translations and return missing and unused keys', async () => {
+	it('should auditModels and return missing and unused keys', async () => {
+		class AuditModel {
+			static usedField = { label: 'Used Key' }
+			static anotherField = { label: 'Another Used Key' }
+		}
+
 		const map = new Map(predefined)
-		map.set('src/example.js', `t("Used Key")\nt("Another Used Key")`)
 		map.set('data/uk/_/t', {
 			'Used Key': 'Використаний ключ',
 			'Unused Key': 'Невикористаний ключ',
 		})
 
-		const db = new DB({ predefined: map })
-		await db.connect()
+		const localDb = new DB({ predefined: map })
+		await localDb.connect()
 
-		const i18n = new I18nDb({ ...i18nDbOptions, db })
-		await i18n.connect()
+		const i18nAudit = new I18nDb({
+			...i18nDbOptions,
+			db: localDb,
+			langs: [{ locale: 'uk', title: 'Українська' }],
+			models: { AuditModel },
+		})
+		await i18nAudit.connect()
 
-		const result = await i18n.auditTranslations()
+		const result = await i18nAudit.auditModels()
 		const uk = result.get('uk')
 		assert.deepEqual(uk.missing, ['Another Used Key'])
 		assert.deepEqual(uk.unused, ['Unused Key'])
 	})
 
-	it.todo('should sync translations for all locales', async () => {
+	it('should syncModels for all locales', async () => {
+		class GlobalModel {
+			static item = { label: 'Global Key' }
+		}
+
 		const map = new Map(predefined)
-		map.set('data/_/langs.json', { uk: 'Ukrainian', en: 'English' })
-		map.set('src/example.js', `t("Global Key")`)
+		map.set('data/_/langs', [
+			{ locale: 'uk', title: 'Ukrainian' },
+			{ locale: 'en', title: 'English' }
+		])
 
-		const db = new DB({ predefined: map })
-		await db.connect()
+		const localDb = new DB({ predefined: map })
+		await localDb.connect()
 
-		const i18n = new I18nDb({ ...i18nDbOptions, db })
-		await i18n.connect()
+		const i18nSync = new I18nDb({
+			...i18nDbOptions,
+			db: localDb,
+			models: { GlobalModel },
+		})
+		await i18nSync.connect()
+		await i18nSync.syncModels()
 
-		await i18n.syncTranslations()
-
-		// Check each locale's vocab
-		const enVocab = await db.loadDocument('data/en/_/t')
-		const ukVocab = await db.loadDocument('data/uk/_/t')
+		const enVocab = await localDb.loadDocument('data/en/_/t')
+		const ukVocab = await localDb.loadDocument('data/uk/_/t')
 
 		assert.equal(enVocab['Global Key'], '')
 		assert.equal(ukVocab['Global Key'], '')

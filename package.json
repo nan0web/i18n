@@ -1,6 +1,6 @@
 {
 	"name": "@nan0web/i18n",
-	"version": "1.2.0",
+	"version": "1.3.0",
 	"description": "A tiny, zero-dependency i18n helper for Java•Script",
 	"type": "module",
 	"main": "src/index.js",

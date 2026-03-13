@@ -26,7 +26,7 @@ export default class I18nDb {
 	langsPath
 	/** @type {string} */
 	dataDir
-	/** @type {Record<string, Record<string, string>>|Array<{value: string, label: string}>} */
+	/** @type {Record<string, Record<string, string>>|Array<{value?: string, label?: string, locale?: string, title?: string}>} */
 	langs
 	/** @type {Record<string, Function>|Function[]} */
 	models
@@ -50,7 +50,7 @@ export default class I18nDb {
 	 * @param {string} [input.dataDir="data"]
 	 * @param {string} [input.srcDir="src"]
 	 * @param {string} [input.useKeyAsDefault=false]
-	 * @param {Record<string, Record<string, string>>|Array<{value: string, label: string}>} [input.langs={}]
+	 * @param {Record<string, Record<string, string>>|Array<{value?: string, label?: string, locale?: string, title?: string}>} [input.langs={}]
 	 * @param {Record<string, Function>|Function[]} [input.models={}] - Model-as-Schema classes for key extraction
 	 */
 	constructor(input) {
@@ -96,7 +96,7 @@ export default class I18nDb {
 	 */
 	get locales() {
 		if (Array.isArray(this.langs)) {
-			return this.langs.map((l) => l.value)
+			return this.langs.map((l) => /** @type {string} */ (l.locale || l.value || ''))
 		}
 		return Object.keys(this.langs)
 	}
@@ -108,8 +108,8 @@ export default class I18nDb {
 	getLangOptions() {
 		if (Array.isArray(this.langs)) {
 			return this.langs.map((l) => ({
-				value: l.value,
-				label: l.label || l.value,
+				value: /** @type {string} */ (l.locale || l.value || ''),
+				label: /** @type {string} */ (l.title || l.label || l.locale || l.value || ''),
 			}))
 		}
 		// Fallback for object format { uk: { label: 'Українська' } } or { uk: 'Українська' }

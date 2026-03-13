@@ -105,3 +105,15 @@ Loaded 631 files from 33 packages.
 3: auth-browser/ [snapshot-auditor] A few words from the response stream to see progress
 02:12 [==----] 36% 12 completed, 1 failed, 21 left
 ```
+
+## 3. Flat Extraction for Model.UI
+
+**Від:** `@nan0web/0hcnai.framework`
+**Дата:** 2026-03-13
+**Пріоритет:** 🟠 Високий
+
+### Суть
+
+Потрібно розширити `extractFromModels`, щоб вона абсолютно "флетила" всі текстові значення з будь-яких вкладених об'єктів та масивів всередині статичної властивості `Model.UI` (або іншої, назва якої починається на `ui` - нечутливо до регістру). Це дозволяє не залежати від суворих правил найменування ключів (label, help) всередині блоків UI повідомлень.
+
+- **Статус:** ✅ ВИКОНАНО

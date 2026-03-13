@@ -124,7 +124,7 @@ export function extractFromModels(models) {
 	const classList = Array.isArray(models) ? models : Object.values(models)
 	const fieldPatterns = EXTRACT_FIELDS.map((f) => new RegExp('^' + f.replace(/\*/g, '.*') + '$'))
 
-	const scanObject = (obj) => {
+	const scanObject = (obj, inUI = false) => {
 		if (!obj || (typeof obj !== 'object' && typeof obj !== 'function')) return
 
 		for (const [propName, propValue] of Object.entries(obj)) {
@@ -132,14 +132,24 @@ export function extractFromModels(models) {
 			if (propName === 'prototype' || propName === 'length' || propName === 'name') continue
 
 			if (typeof propValue === 'string') {
-				const matches = fieldPatterns.some((re) => re.test(propName))
-				if (matches) keys.add(propValue)
+				if (inUI) {
+					keys.add(propValue)
+				} else {
+					const matches = fieldPatterns.some((re) => re.test(propName))
+					if (matches) keys.add(propValue)
+				}
 			} else if (propValue && typeof propValue === 'object') {
 				// Recursive scan for nested UI or field objects
 				// but check if it's an array (options)
 				if (Array.isArray(propValue)) {
-					// Handle options array specifically
-					if (propName === 'options') {
+					if (inUI) {
+						// Inside UI*, extract any string in the array
+						for (const item of propValue) {
+							if (typeof item === 'string') keys.add(item)
+							else if (item && typeof item === 'object') scanObject(item, true)
+						}
+					} else if (propName === 'options') {
+						// Handle options array specifically
 						for (const opt of propValue) {
 							if (!opt || typeof opt !== 'object') continue
 							for (const [optKey, optVal] of Object.entries(opt)) {
@@ -152,8 +162,8 @@ export function extractFromModels(models) {
 						}
 					}
 				} else {
-					// Generic object recursion
-					scanObject(propValue)
+					// Generic object recursion (mark true if we hit a 'UI' property)
+					scanObject(propValue, inUI || propName.toLowerCase().startsWith('ui'))
 				}
 			}
 		}

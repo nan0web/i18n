@@ -17,7 +17,7 @@ export default class I18nDb {
      * @param {string} [input.dataDir="data"]
      * @param {string} [input.srcDir="src"]
      * @param {string} [input.useKeyAsDefault=false]
-     * @param {Record<string, Record<string, string>>|Array<{value: string, label: string}>} [input.langs={}]
+     * @param {Record<string, Record<string, string>>|Array<{value?: string, label?: string, locale?: string, title?: string}>} [input.langs={}]
      * @param {Record<string, Function>|Function[]} [input.models={}] - Model-as-Schema classes for key extraction
      */
     constructor(input: {
@@ -30,8 +30,10 @@ export default class I18nDb {
         srcDir?: string | undefined;
         useKeyAsDefault?: string | undefined;
         langs?: Record<string, Record<string, string>> | {
-            value: string;
-            label: string;
+            value?: string;
+            label?: string;
+            locale?: string;
+            title?: string;
         }[] | undefined;
         models?: Record<string, Function> | Function[] | undefined;
     });
@@ -50,10 +52,12 @@ export default class I18nDb {
     langsPath: string;
     /** @type {string} */
     dataDir: string;
-    /** @type {Record<string, Record<string, string>>|Array<{value: string, label: string}>} */
+    /** @type {Record<string, Record<string, string>>|Array<{value?: string, label?: string, locale?: string, title?: string}>} */
     langs: Record<string, Record<string, string>> | Array<{
-        value: string;
-        label: string;
+        value?: string;
+        label?: string;
+        locale?: string;
+        title?: string;
     }>;
     /** @type {Record<string, Function>|Function[]} */
     models: Record<string, Function> | Function[];
