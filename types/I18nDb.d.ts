@@ -3,7 +3,7 @@
  */
 /**
  * I18nDb — i18n manager that uses DB for loading vocabs
- * Supports hierarchical loading, reactive updates and configurable t.json path.
+ * Supports hierarchical loading, reactive updates and configurable t path.
  */
 export default class I18nDb {
     /**
@@ -11,7 +11,7 @@ export default class I18nDb {
      * @param {Object} input
      * @param {import("@nan0web/db").default} input.db
      * @param {string} [input.locale="en"]
-     * @param {string} [input.tPath] - path suffix to look for translation files (default: _/t.yaml)
+     * @param {string} [input.tPath] - path suffix to look for translation files (default: _/t)
      * @param {string} [input.langsPath] - path of the languages config (default: _/langs)
      * @param {import("@nan0web/event/types/types/index.js").EventBus} [input.emitter]
      * @param {string} [input.dataDir="data"]

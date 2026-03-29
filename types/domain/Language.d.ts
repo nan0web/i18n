@@ -1,5 +1,10 @@
 /** @typedef {'en' | 'en_GB' | 'en_US' | 'uk' | 'uk_UA'} Locale */
-export class Language {
+/**
+ * @property {string} title Language title
+ * @property {Locale} locale Locale
+ * @property {string} icon Language icon
+ */
+export class Language extends Model {
     static title: {
         help: string;
         default: string;
@@ -16,13 +21,6 @@ export class Language {
         help: string;
         default: string;
     };
-    /** @param {Partial<Language>} [data] */
-    constructor(data?: Partial<Language>);
-    /** @type {string} */
-    title: string;
-    /** @type {Locale} */
-    locale: Locale;
-    /** @type {string} */
-    icon: string;
 }
 export type Locale = "en" | "en_GB" | "en_US" | "uk" | "uk_UA";
+import { Model } from '@nan0web/types';

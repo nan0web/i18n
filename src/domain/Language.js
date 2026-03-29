@@ -1,8 +1,13 @@
-import { resolveAliases, resolveDefaults } from '@nan0web/types'
+import { Model } from '@nan0web/types'
 
 /** @typedef {'en' | 'en_GB' | 'en_US' | 'uk' | 'uk_UA'} Locale */
 
-export class Language {
+/**
+ * @property {string} title Language title
+ * @property {Locale} locale Locale
+ * @property {string} icon Language icon
+ */
+export class Language extends Model {
 	static title = {
 		help: 'Language title',
 		default: '',
@@ -18,18 +23,5 @@ export class Language {
 	static icon = {
 		help: 'Language icon',
 		default: '🇬🇧',
-	}
-
-	/** @type {string} */
-	title = Language.title.default
-	/** @type {Locale} */
-	locale = Language.locale.default
-	/** @type {string} */
-	icon = Language.icon.default
-
-	/** @param {Partial<Language>} [data] */
-	constructor(data = {}) {
-		data = resolveAliases(Language, data)
-		Object.assign(this, resolveDefaults(Language, data))
 	}
 }

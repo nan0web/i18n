@@ -8,7 +8,7 @@ import event from '@nan0web/event'
 
 /**
  * I18nDb — i18n manager that uses DB for loading vocabs
- * Supports hierarchical loading, reactive updates and configurable t.json path.
+ * Supports hierarchical loading, reactive updates and configurable t path.
  */
 export default class I18nDb {
 	/** @type {import('@nan0web/db').default} */
@@ -44,7 +44,7 @@ export default class I18nDb {
 	 * @param {Object} input
 	 * @param {import("@nan0web/db").default} input.db
 	 * @param {string} [input.locale="en"]
-	 * @param {string} [input.tPath] - path suffix to look for translation files (default: _/t.yaml)
+	 * @param {string} [input.tPath] - path suffix to look for translation files (default: _/t)
 	 * @param {string} [input.langsPath] - path of the languages config (default: _/langs)
 	 * @param {import("@nan0web/event/types/types/index.js").EventBus} [input.emitter]
 	 * @param {string} [input.dataDir="data"]
@@ -68,7 +68,8 @@ export default class I18nDb {
 		this.db = db
 		this.locale = locale
 		this.tPath = input.tPath ?? (db?.Directory?.FILE ? `${db.Directory.FILE}/t` : '_/t')
-		this.langsPath = input.langsPath ?? (db?.Directory?.FILE ? `${db.Directory.FILE}/langs` : '_/langs')
+		this.langsPath =
+			input.langsPath ?? (db?.Directory?.FILE ? `${db.Directory.FILE}/langs` : '_/langs')
 		this.dataDir = dataDir.endsWith('/') ? dataDir.slice(0, -1) : dataDir
 		this.srcDir = srcDir.endsWith('/') ? srcDir.slice(0, -1) : srcDir
 		this.langs = langs
@@ -146,21 +147,28 @@ export default class I18nDb {
 
 		/** @type {Record<string,string>} */
 		const vocab = {}
-		const fullPath = await this.db.resolve(uri)
-		const segments = fullPath.split('/').filter(Boolean)
 
-		// Collect from all parent `.../tPath`
+		// Hierarchical loading logic:
+		// For uri='uk/apps/topup-tel' and tPath='_/t', it should load:
+		// 1. uk/_/t
+		// 2. uk/apps/_/t
+		// 3. uk/apps/topup-tel/_/t
+		const segments = uri.split('/').filter(Boolean)
+		const paths = []
 		for (let i = 1; i <= segments.length; i++) {
-			const dirPath = [this.dataPath, ...segments.slice(0, i), this.tPath]
-				.filter(Boolean)
-				.join('/')
-				.replace(/\/{2,}/g, '/')
+			const subPath = segments.slice(0, i).join('/')
+			const path = [this.dataDir, subPath, this.tPath].filter(Boolean).join('/')
+			paths.push(path)
+		}
+
+		for (const path of paths) {
 			try {
-				const partial = await this.db.loadDocument(dirPath, {})
-				Object.assign(vocab, partial)
+				const doc = await this.db.loadDocument(path)
+				if (doc) {
+					Object.assign(vocab, doc.t ?? doc)
+				}
 			} catch (err) {
-				// Continue even if file is missing
-				this.emitter.emit('error', err)
+				this.emitter.emit('error', { data: err, uri: path })
 			}
 		}
 
@@ -180,7 +188,7 @@ export default class I18nDb {
 		const t = this._tFunctions.get(uri)
 		if (t) return t
 
-		const url = this.db.resolveSync(locale, uri)
+		const url = this.db.absolute(locale, uri).replace(/^\/+/, '')
 		const vocab = await this.loadT(url)
 		const newT = createT(vocab, locale)
 		this._tFunctions.set(uri, newT)

@@ -21,7 +21,8 @@ export default async function sync(args = {}) {
 
 	await i18n.syncTranslationsAll()
 
-	console.info(`✅ Translations synced from src/ into data/**/${tPath}`)
+	const pathName = opts.tPath || 't.yaml'
+	console.info(`✅ Translations synced from src/ into data/**/${pathName}`)
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

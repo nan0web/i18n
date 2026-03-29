@@ -5,7 +5,10 @@ import I18nDb from './I18nDb.js'
 
 export { I18nDb }
 export { i18n, defaultVocab } from './i18n.js'
+/** Marker for i18n extraction. Returns the key as-is. */
+export const t = (key) => key
 export { createT } from '@nan0web/types'
 export { extract, extractFromModels, extractInfo, EXTRACT_FIELDS } from './extract.js'
+export { Language } from './domain/Language.js'
 
 export default i18n

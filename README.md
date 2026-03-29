@@ -99,23 +99,41 @@ import { I18nDb } from "@nan0web/i18n"
 const db = new DB({
 	predefined: new Map([
 		['data/uk/_/t', { 'Welcome!': 'Ласкаво просимо!', Home: 'Дім' }],
+		['data/uk/index', { title: 'Головна' }],
 		[
 			'data/uk/apps/topup-tel/_/t',
 			{
-				'ui-cli.Volume': 'Гучність',
-				'Top-up Telephone': 'Поповнення телефону',
+				Amount: 'Сума',
+				Telephone: 'Номер телефону',
 				Home: 'Головна',
 			},
 		],
+		['data/uk/apps/topup-tel/index', { title: 'Поповнити телефон' }]
 	]),
 })
+/**
+ * @property {string} tel Telephone.
+ * @property {number} amount Toput amount.
+ */
+class TopupModel extends Model {
+	static tel = { help: 'Telephone', default: '' }
+	static amount = { help: 'Amount', default: 33 }
+	static UI = {
+		home: 'Home',
+		welcome: 'Welcome!',
+	}
+}
 await db.connect()
 const i18n = new I18nDb({ db, locale: 'uk', dataDir: 'data' })
-const t = await i18n.createT('uk', 'apps/topup-tel')
-console.info(t('ui-cli.Volume')) // ← "Гучність" (namespaced)
-console.info(t('Top-up Telephone')) // ← "Поповнення телефону"
-console.info(t('Welcome!')) // ← "Ласкаво просимо!" (inherited fallback)
-console.info(t('Home')) // ← "Головна" (prioritized local)
+let t = await i18n.createT('uk', 'apps/topup-tel/index')
+console.info(t(TopupModel.tel.help)) // ← "Номер телефону"
+console.info(t(TopupModel.amount.help)) // ← "Сума"
+// Welcome! is inherited from uk/_/t
+console.info(t('Welcome!')) // ← "Ласкаво просимо!"
+console.info(t('Home')) // ← "Головна"
+t = await i18n.createT('uk', 'index')
+console.info(t('Welcome!')) // ← "Ласкаво просимо!"
+console.info(t('Home')) // ← "Дім"
 ```
 ## Key Extraction
 
@@ -201,7 +219,7 @@ Extracts translation keys directly from Model-as-Schema classes.
 ### `I18nDb` Methods *(v1.1.0+)*
   * `extractKeysFromModels(models?)` → `Set<string>`
   * `auditModels(models?)` → `Map<locale, {missing, unused}>`
-  * `syncModels(targetUri?, opts?)` → writes missing keys to t.yaml
+  * `syncModels(targetUri?, opts?)` → writes missing keys to t
 
 ### Deprecated Methods
   * ~~`extractKeysFromCode(srcPath)`~~ → use `extractKeysFromModels()`
@@ -235,7 +253,7 @@ npx i18n <command>
 ### Commands
 
 #### `i18n generate`
-Generates Java•Script cache files from YAML source of truth. This is useful for web bundles (Vite/Webpack) to avoid parsing YAML at runtime.
+Generates Java•Script cache files from source of truth. This is useful for web bundles (Vite/Webpack) to avoid parsing YAML/JSON at runtime.
 
 - **Options**
   - `--data <dir>` – Data directory containing `{locale}/_/t` (default: `./data`)
