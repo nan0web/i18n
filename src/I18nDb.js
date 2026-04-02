@@ -188,7 +188,7 @@ export default class I18nDb {
 		const t = this._tFunctions.get(uri)
 		if (t) return t
 
-		const url = this.db.absolute(locale, uri).replace(/^\/+/, '')
+		const url = [locale, uri].filter(Boolean).join('/')
 		const vocab = await this.loadT(url)
 		const newT = createT(vocab, locale)
 		this._tFunctions.set(uri, newT)
