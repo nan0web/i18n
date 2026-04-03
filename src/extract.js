@@ -38,7 +38,7 @@ export function extract(content) {
 	const fields = EXTRACT_FIELDS.map((s) => s.replace('*', '[a-zA-Z0-9_]*')).join('|')
 	const regexes = [
 		/\bt\(['"`](.*?)['"`]\)/g,
-		new RegExp(`\\b(?:${fields}):\\s*['"\`](.*?)['"\`]`, 'g'),
+		new RegExp(`\\b(?:${fields})\\s*[:=]\\s*['"\`](.*?)['"\`]`, 'g'),
 		/\/\/\s*t\(['"`](.*?)['"`]\)/g,
 	]
 

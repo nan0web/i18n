@@ -6,7 +6,7 @@
 
 |Назва пакета|[Статус](https://github.com/nan0web/monorepo/blob/main/system.md#написання-сценаріїв)|Документація|Покриття тестами|Можливості|Версія Npm|
 |---|---|---|---|---|---|
-|[@nan0web/i18n](https://github.com/nan0web/i18n/) |🟢 `100%` |🧪 [English 🏴󠁧󠁢󠁥󠁮󠁧󠁿](https://github.com/nan0web/i18n/blob/main/README.md)<br />[Українською 🇺🇦](https://github.com/nan0web/i18n/blob/main/docs/uk/README.md) |- |✅ d.ts 📜 system.md 🕹️ playground |1.4.0 |
+|[@nan0web/i18n](https://github.com/nan0web/i18n/) |🟢 `100%` |🧪 [English 🏴󠁧󠁢󠁥󠁮󠁧󠁿](https://github.com/nan0web/i18n/blob/main/README.md)<br />[Українською 🇺🇦](https://github.com/nan0web/i18n/blob/main/docs/uk/README.md) |- |✅ d.ts 📜 system.md 🛡️ i18n inspect |1.5.0 |
 
 ## Встановлення
 
@@ -30,20 +30,27 @@ yarn add @nan0web/i18n
 Як працювати з кількома словниками?
 ```js
 import { i18n, createT } from "@nan0web/i18n"
+
 const en = { 'Welcome!': 'Welcome, {name}!' }
 const uk = { 'Welcome!': 'Вітаю, {name}!' }
 const ukRU = { 'Welcome!': 'Привіт, {name}!' }
 const ukCA = { 'Welcome!': 'Вітаємо, {name}!' }
+
 const getVocab = i18n({ en, uk, 'uk-RU': ukRU, 'uk-CA': ukCA })
+
 let t = createT(getVocab('en', en))
 console.info(t('Welcome!', { name: 'Alice' })) // ← "Welcome, Alice!"
+
 t = createT(getVocab('uk', en))
 console.info(t('Welcome!', { name: 'Богдан' })) // ← "Вітаю, Богдан!"
+
 t = createT(getVocab('uk-RU', en))
 console.info(t('Welcome!', { name: 'Саша' })) // ← "Привіт, Саша!"
+
 t = createT(getVocab('uk-CA', en))
 console.info(t('Welcome!', { name: 'Марія' })) // ← "Вітаємо, Марія!"
 ```
+
 > Переклад — це не просто інтернаціоналізація.
 > Це відкриття іншої реальності через мову.
 
@@ -80,14 +87,22 @@ t('Language title')
 2. **Пошук у батьківських словниках** (через сегменти `I18nDb`).
 3. **Оригінальний ключ із Моделі** (як останній фолбек).
 
+### 5. Архітектурна цілісність (v1.5.0+)
+Використовуйте `i18n inspect` для впевненості, що:
+- В `t()` не використовуються захардкоджені рядки.
+- Усі ключі, що використовуються в UI, присутні у словнику.
+- У словниках немає зайвих ключів, що не використовуються.
+
 Як обробляти переклади з відсутніми ключами?
 ```js
 import { i18n, createT } from "@nan0web/i18n"
 const getVocab = i18n({ en: { 'Welcome!': 'Welcome, {name}!' } })
 const en = { 'Welcome!': 'Welcome, {name}!' }
+
 const t = createT(getVocab('unknown', en))
 console.info(t('Welcome!', { name: 'Fallback' })) // ← "Welcome, Fallback!"
 ```
+
 ## Використання з базою даних
 
 `I18nDb` підтримує ієрархічне завантаження (Локальний → Батьківський → Кореневий) та простори імен.
@@ -96,6 +111,7 @@ console.info(t('Welcome!', { name: 'Fallback' })) // ← "Welcome, Fallback!"
 ```js
 import DB from "@nan0web/db"
 import { I18nDb } from "@nan0web/i18n"
+
 const db = new DB({
 	predefined: new Map([
 		['data/uk/_/t', { 'Welcome!': 'Ласкаво просимо!', Home: 'Дім' }],
@@ -111,6 +127,7 @@ const db = new DB({
 		['data/uk/apps/topup-tel/index', { title: 'Поповнити телефон' }]
 	]),
 })
+
 /**
  * @property {string} tel Телефон.
  * @property {number} amount Сума поповнення.
@@ -123,18 +140,22 @@ class TopupModel extends Model {
 		welcome: 'Welcome!',
 	}
 }
+
 await db.connect()
 const i18n = new I18nDb({ db, locale: 'uk', dataDir: 'data' })
 let t = await i18n.createT('uk', 'apps/topup-tel/index')
+
 console.info(t(TopupModel.tel.help)) // ← "Номер телефону"
 console.info(t(TopupModel.amount.help)) // ← "Сума"
 // Welcome! успадковується з uk/_/t
 console.info(t('Welcome!')) // ← "Ласкаво просимо!"
 console.info(t('Home')) // ← "Головна"
+
 t = await i18n.createT('uk', 'index')
 console.info(t('Welcome!')) // ← "Ласкаво просимо!"
 console.info(t('Home')) // ← "Дім"
 ```
+
 ## Витяг ключів
 
 ### `extractFromModels(models)` — Основний (v1.1.0+)
@@ -148,6 +169,7 @@ console.info(t('Home')) // ← "Дім"
 ```js
 import { extractFromModels } from "@nan0web/i18n"
 import { Language } from "./domain/Language.js"
+
 const keys = extractFromModels({ Language })
 console.info(keys)
 // ← ['Invalid locale format', 'Language icon', 'Language title', 'Locale', 'Locale not found']
@@ -178,12 +200,13 @@ console.info(keys)
 ```js
 import { extract } from "@nan0web/i18n"
 const content = `
-console.log(t("Hello, {name}!"))
-const menu = ["First", "Second"] // t("First"), t("Second")
-`
+		console.log(t("Hello, {name}!"))
+		const menu = ["First", "Second"] // t("First"), t("Second")
+		`
 const keys = extract(content)
 console.info(keys) // ← ["First", "Hello, {name}!", "Second"]
 ```
+
 ## API
 
 ### `createT(vocab, locale?)`
@@ -265,6 +288,16 @@ npx i18n generate --data ./my-data --out ./src/translations
 
 #### `i18n audit`
 Аудит i18n-ключів за допомогою `extractKeysFromModels()` — знаходить відсутні або невикористані переклади.
+
+#### `i18n inspect` *(v1.5.0+)*
+Виконує детермінований архітектурний аудит за допомогою Regex-парсингу:
+- Виявляє заборонені захардкоджені рядки у викликах `t()`.
+- Сканує класи Моделей на відповідність архітектурним стандартам.
+- Перевіряє наявність ключів у файлах словників.
+
+```bash
+npx i18n inspect --domain=src/domain --vocab=data/uk/_/t.nan0 --ui=src/ui
+```
 
 #### `i18n sync`
 Синхронізує переклади, використовуючи ключі Моделей як єдине джерело правди.

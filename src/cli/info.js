@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { fileURLToPath } from 'node:url'
-import { extractInfo } from '../src/extract.js'
+import { extractInfo } from '../extract.js'
 
 /**
  * @function info

@@ -19,16 +19,16 @@ describe('v1.0.3 — Fix package publishing', () => {
 		assert.ok(existsSync(binPath), 'bin/i18n.js must exist')
 	})
 
-	it('bin/generate.js exists', async () => {
+	it('src/cli/generate.js exists', async () => {
 		const { existsSync } = await import('node:fs')
-		const genPath = new URL('../../../bin/generate.js', import.meta.url)
-		assert.ok(existsSync(genPath), 'bin/generate.js must exist')
+		const genPath = new URL('../../../src/cli/generate.js', import.meta.url)
+		assert.ok(existsSync(genPath), 'src/cli/generate.js must exist')
 	})
 
-	it('bin/audit.js exists', async () => {
+	it('src/cli/audit.js exists', async () => {
 		const { existsSync } = await import('node:fs')
-		const auditPath = new URL('../../../bin/audit.js', import.meta.url)
-		assert.ok(existsSync(auditPath), 'bin/audit.js must exist')
+		const auditPath = new URL('../../../src/cli/audit.js', import.meta.url)
+		assert.ok(existsSync(auditPath), 'src/cli/audit.js must exist')
 	})
 
 	it('stale scripts/ directory does not exist', async () => {

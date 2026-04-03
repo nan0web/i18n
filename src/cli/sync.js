@@ -2,7 +2,7 @@
 import { fileURLToPath } from 'node:url'
 
 import DBFS from '@nan0web/db-fs'
-import I18nDb from '../src/I18nDb.js'
+import I18nDb from '../I18nDb.js'
 
 /**
  * @function sync

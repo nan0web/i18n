@@ -56,7 +56,7 @@ function testRender() {
 	 *
 	 * |Package name|[Status](https://github.com/nan0web/monorepo/blob/main/system.md#написання-сценаріїв)|Documentation|Test coverage|Features|Npm version|
 	 * |---|---|---|---|---|---|
-	 * |[@nan0web/i18n](https://github.com/nan0web/i18n/) |🟢 `100%` |🧪 [English 🏴󠁧󠁢󠁥󠁮󠁧󠁿](https://github.com/nan0web/i18n/blob/main/README.md)<br />[Українською 🇺🇦](https://github.com/nan0web/i18n/blob/main/docs/uk/README.md) |- |✅ d.ts 📜 system.md 🕹️ playground |1.2.0 |
+	 * |[@nan0web/i18n](https://github.com/nan0web/i18n/) |🟢 `100%` |🧪 [English 🏴󠁧󠁢󠁥󠁮󠁧󠁿](https://github.com/nan0web/i18n/blob/main/README.md)<br />[Українською 🇺🇦](https://github.com/nan0web/i18n/blob/main/docs/uk/README.md) |- |✅ d.ts 📜 system.md 🛡️ i18n inspect |1.5.0 |
 	 *
 	 * ## Installation
 	 */
@@ -164,6 +164,12 @@ function testRender() {
 	 * 1. **Look in local vocabulary** of the product.
 	 * 2. **Look in parent vocabularies** (via `I18nDb` segments).
 	 * 3. **Original Key from the Model** (as a final fallback).
+	 *
+	 * ### 5. Architectural Integrity (v1.5.0+)
+	 * Use `i18n inspect` to ensure that:
+	 * - No hardcoded string literals are used in `t()` calls.
+	 * - All keys used in UI are present in the vocabulary.
+	 * - No unused keys are wasting space in your dictionaries.
 	 */
 	it('How to handle translations with missing keys?', () => {
 		//import { i18n, createT } from "@nan0web/i18n"
@@ -384,6 +390,16 @@ function testRender() {
 	 *
 	 * #### `i18n audit`
 	 * Audits i18n keys using `extractKeysFromModels()` and finds missing or unused translations.
+	 *
+	 * #### `i18n inspect` *(v1.5.0+)*
+	 * Performs a deterministic architectural audit using Regex parsing:
+	 * - Detects forbidden hardcoded literals in `t()` calls.
+	 * - Scans Model classes for architectural compliance.
+	 * - Checks for missing keys in vocabulary files.
+	 *
+	 * ```bash
+	 * npx i18n inspect --domain=src/domain --vocab=data/uk/_/t.nan0 --ui=src/ui
+	 * ```
 	 *
 	 * #### `i18n sync`
 	 * Syncs translations using Model keys as the single source of truth.

@@ -16,9 +16,13 @@ export default async function audit() {
 	const i18n = new I18nDb({ db, dataDir: 'data', srcDir: 'src' })
 	await i18n.connect()
 
+	const resultMap = await i18n.auditTranslations()
+
 	for (const locale of i18n.locales) {
 		i18n.locale = locale
-		const { missing, unused } = await i18n.auditTranslations()
+		const result = resultMap.get(locale)
+		const missing = result?.missing || []
+		const unused = result?.unused || []
 
 		if (missing.length > 0) {
 			console.error(`❌ Missing translations for ${locale}:`, missing)

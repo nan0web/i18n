@@ -163,7 +163,7 @@ export default class I18nDb {
 
 		for (const path of paths) {
 			try {
-				const doc = await this.db.loadDocument(path)
+				const doc = await this.db.loadDocument(this.db.absolute ? this.db.absolute(path) : path)
 				if (doc) {
 					Object.assign(vocab, doc.t ?? doc)
 				}
@@ -188,7 +188,7 @@ export default class I18nDb {
 		const t = this._tFunctions.get(uri)
 		if (t) return t
 
-		const url = [locale, uri].filter(Boolean).join('/')
+		const url = this.db.absolute ? this.db.absolute([locale, uri].filter(Boolean).join('/')) : [locale, uri].filter(Boolean).join('/')
 		const vocab = await this.loadT(url)
 		const newT = createT(vocab, locale)
 		this._tFunctions.set(uri, newT)
